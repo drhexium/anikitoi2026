@@ -88,7 +88,7 @@
     /* Mountain & Forest Silhouette Vector Backdrop */
     .mountain-backdrop {
       position: absolute;
-      bottom: 0;
+      bottom: 48px;
       left: 0;
       width: 100%;
       height: 48vh;
@@ -121,7 +121,7 @@
     .top-telemetry {
       position: relative;
       z-index: 10;
-      padding: 1.25rem 2rem;
+      padding: 0.65rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -203,8 +203,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 1.5rem 1.25rem 2.5rem;
+      justify-content: flex-start;
+      padding: 0.4rem 1.25rem 0.5rem;
       text-align: center;
       max-width: 1100px;
       margin: 0 auto;
@@ -217,26 +217,26 @@
       gap: 0.5rem;
       background: rgba(255, 107, 26, 0.08);
       border: 1px solid rgba(255, 107, 26, 0.3);
-      padding: 0.35rem 1rem;
+      padding: 0.3rem 0.95rem;
       border-radius: 999px;
       font-family: var(--font-mono);
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       letter-spacing: 0.14em;
       color: var(--trail-amber);
       text-transform: uppercase;
-      margin-bottom: 1.25rem;
+      margin-bottom: 0.55rem;
     }
 
     .trail-badge svg {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
       fill: currentColor;
     }
 
     /* Title: Ανίκητοι 2026 */
     .main-title {
       font-family: var(--font-display);
-      font-size: clamp(2.8rem, 8.5vw, 6.4rem);
+      font-size: clamp(2.6rem, 7.8vw, 5.8rem);
       font-weight: 900;
       line-height: 1;
       letter-spacing: -0.01em;
@@ -245,17 +245,17 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       text-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.25rem;
     }
 
     .main-subtitle {
       font-family: var(--font-mono);
-      font-size: clamp(0.85rem, 2.2vw, 1.15rem);
+      font-size: clamp(0.82rem, 2vw, 1.05rem);
       font-weight: 600;
       color: var(--trail-orange);
       letter-spacing: 0.25em;
       text-transform: uppercase;
-      margin-bottom: 2.75rem;
+      margin-bottom: 1.35rem;
       display: flex;
       align-items: center;
       gap: 0.75rem;
@@ -276,11 +276,11 @@
     ------------------------------------------------------------- */
     .clock-container {
       width: 100%;
-      max-width: 920px;
+      max-width: 900px;
       background: linear-gradient(145deg, rgba(17, 27, 22, 0.88) 0%, rgba(9, 15, 12, 0.94) 100%);
       border: 1px solid var(--surface-border);
       border-radius: 20px;
-      padding: 2.2rem 1.75rem;
+      padding: 1.5rem 1.4rem;
       box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.03);
       position: relative;
       backdrop-filter: blur(12px);
@@ -304,14 +304,14 @@
     .clock-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 1.25rem;
+      gap: 1rem;
     }
 
     .time-slot {
       background: rgba(6, 11, 9, 0.85);
       border: 1px solid rgba(72, 102, 88, 0.3);
       border-radius: 14px;
-      padding: 1.8rem 0.5rem;
+      padding: 1.3rem 0.5rem;
       text-align: center;
       position: relative;
       box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.7);
@@ -339,14 +339,14 @@
 
     .time-val {
       font-family: var(--font-mono);
-      font-size: clamp(2.6rem, 7.5vw, 5.6rem);
+      font-size: clamp(2.4rem, 6.6vw, 4.8rem);
       font-weight: 800;
       font-variant-numeric: tabular-nums;
       line-height: 1;
       color: #ffffff;
       text-shadow: 0 0 25px rgba(255, 255, 255, 0.15), 0 4px 15px rgba(0, 0, 0, 0.9);
       display: block;
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.35rem;
       position: relative;
       z-index: 2;
     }
@@ -358,7 +358,7 @@
 
     .time-label {
       font-family: var(--font-accent);
-      font-size: clamp(0.75rem, 1.5vw, 1rem);
+      font-size: clamp(0.72rem, 1.4vw, 0.92rem);
       font-weight: 600;
       letter-spacing: 0.25em;
       text-transform: uppercase;
@@ -370,8 +370,8 @@
 
     /* Sub-bar inside clock */
     .clock-footer {
-      margin-top: 1.75rem;
-      padding-top: 1.25rem;
+      margin-top: 1.25rem;
+      padding-top: 0.95rem;
       border-top: 1px solid rgba(72, 102, 88, 0.2);
       display: flex;
       justify-content: space-between;
@@ -525,16 +525,16 @@
     /* Basecamp Scene at Foreground Bottom */
     .basecamp-scenery {
       position: absolute;
-      bottom: 0;
+      bottom: 56px;
       left: 0;
       width: 100%;
-      height: 160px;
+      height: 165px;
       pointer-events: none;
       z-index: 3;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      padding: 0 max(20px, 4vw) 12px;
+      padding: 0 max(20px, 4vw) 6px;
     }
 
     .camp-cluster {
@@ -645,14 +645,15 @@
     .bottom-bar {
       position: relative;
       z-index: 10;
-      padding: 1.25rem 2rem;
+      padding: 0.65rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-family: var(--font-mono);
       font-size: 0.72rem;
       color: var(--text-muted);
-      border-top: 1px solid rgba(72, 102, 88, 0.12);
+      background: rgba(6, 10, 8, 0.9);
+      border-top: 1px solid rgba(72, 102, 88, 0.2);
     }
 
     /* -------------------------------------------------------------
@@ -685,12 +686,13 @@
         gap: 0.5rem;
       }
       .bottom-bar {
-        padding: 1rem 1.25rem;
+        padding: 0.65rem 1.25rem;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.35rem;
         text-align: center;
       }
       .basecamp-scenery {
+        bottom: 55px;
         height: 115px;
         padding: 0 8px 6px;
       }
@@ -1047,7 +1049,7 @@
         if (Math.random() < 0.45) {
           const campOriginX = canvas.width * 0.75 + (Math.random() - 0.5) * 70;
           this.x = campOriginX;
-          this.y = canvas.height - 25 - Math.random() * 30;
+          this.y = canvas.height - 85 - Math.random() * 25;
           this.size = Math.random() * 2.2 + 0.8;
           this.speedY = -(Math.random() * 1.1 + 0.5);
           this.speedX = (Math.random() - 0.35) * 0.6;
