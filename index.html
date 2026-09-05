@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ανίκητοι 2026 | Countdown</title>
+  <meta name="description" content="Ανίκητοι 2026 - Greek Forests 4x4 Mountain Expedition Countdown" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Montserrat:wght@400;600;700;800;900&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-deep: #060a08;
+      --bg-forest: #0d1612;
+      --bg-slate: #141c18;
+      --trail-orange: #ff6b1a;
+      --trail-amber: #f59e0b;
+      --trail-glow: rgba(255, 107, 26, 0.35);
+      --foliage-green: #22c55e;
+      --surface-border: rgba(90, 125, 108, 0.22);
+      --surface-border-bright: rgba(255, 107, 26, 0.4);
+      --text-main: #f0f5f2;
+      --text-secondary: #9cb1a6;
+      --text-muted: #5e776a;
+      
+      --font-display: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-accent: 'Oswald', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      font-family: var(--font-display);
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      background: radial-gradient(circle at 50% 15%, rgba(255, 107, 26, 0.08) 0%, transparent 55%),
+                  radial-gradient(circle at 80% 80%, rgba(34, 197, 94, 0.05) 0%, transparent 45%),
+                  linear-gradient(180deg, #070d0a 0%, #0c1511 60%, #050807 100%);
+    }
+
+    /* -------------------------------------------------------------
+       ATMOSPHERIC BACKGROUND (MOUNTAINS, TREES, SILHOUETTES, MIST)
+    ------------------------------------------------------------- */
+    .bg-layers {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    /* Subtle Topographic Contours */
+    .topo-grid {
+      position: absolute;
+      inset: 0;
+      opacity: 0.12;
+      background-image: url("data:image/svg+xml,%3Csvg width='360' height='360' viewBox='0 0 360 360' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 90 Q 90 30 180 90 T 360 90 M0 180 Q 110 110 200 180 T 360 180 M0 270 Q 90 330 180 270 T 360 270' fill='none' stroke='%23ff6b1a' stroke-width='0.6'/%3E%3Cpath d='M0 45 Q 70 110 160 50 T 340 70 M30 220 Q 140 160 250 220 T 360 250' fill='none' stroke='%2322c55e' stroke-width='0.5'/%3E%3C/svg%3E");
+      background-size: 540px 540px;
+    }
+
+    /* Ambient floating dust/embers canvas */
+    #particlesCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.45;
+    }
+
+    /* Mountain & Forest Silhouette Vector Backdrop */
+    .mountain-backdrop {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 48vh;
+      min-height: 280px;
+      z-index: 2;
+    }
+
+    /* Slow drifting mist animation across bottom */
+    .mist-layer {
+      position: absolute;
+      bottom: 0;
+      left: -50%;
+      width: 200%;
+      height: 35vh;
+      background: radial-gradient(ellipse at 50% 100%, rgba(20, 36, 28, 0.45) 0%, rgba(13, 22, 18, 0.25) 45%, transparent 75%);
+      animation: driftMist 28s ease-in-out infinite alternate;
+      z-index: 3;
+      filter: blur(16px);
+    }
+
+    @keyframes driftMist {
+      0% { transform: translateX(-5%) scaleY(1); opacity: 0.4; }
+      50% { transform: translateX(5%) scaleY(1.15); opacity: 0.7; }
+      100% { transform: translateX(-3%) scaleY(0.95); opacity: 0.4; }
+    }
+
+    /* -------------------------------------------------------------
+       TOP TELEMETRY NAV
+    ------------------------------------------------------------- */
+    .top-telemetry {
+      position: relative;
+      z-index: 10;
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+    }
+
+    .tele-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--foliage-green);
+      box-shadow: 0 0 10px var(--foliage-green);
+      animation: pulseDot 2.2s infinite ease-in-out;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.75); opacity: 0.4; }
+    }
+
+    .tele-tag {
+      color: var(--text-muted);
+    }
+
+    .tele-val {
+      color: var(--trail-orange);
+      font-weight: 700;
+    }
+
+    .tele-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .audio-btn {
+      background: rgba(18, 28, 23, 0.7);
+      border: 1px solid var(--surface-border);
+      color: var(--text-secondary);
+      padding: 0.35rem 0.8rem;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.25s ease;
+    }
+
+    .audio-btn:hover {
+      border-color: var(--trail-orange);
+      color: var(--trail-orange);
+    }
+
+    .audio-btn.active {
+      background: var(--trail-orange);
+      color: #000;
+      border-color: var(--trail-orange);
+      box-shadow: 0 0 15px var(--trail-glow);
+    }
+
+    /* -------------------------------------------------------------
+       MAIN COUNTDOWN STAGE
+    ------------------------------------------------------------- */
+    .hero-stage {
+      position: relative;
+      z-index: 10;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1.25rem 2.5rem;
+      text-align: center;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .trail-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 107, 26, 0.08);
+      border: 1px solid rgba(255, 107, 26, 0.3);
+      padding: 0.35rem 1rem;
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      color: var(--trail-amber);
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+
+    .trail-badge svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    /* Title: Ανίκητοι 2026 */
+    .main-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.8rem, 8.5vw, 6.4rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, #ffffff 30%, #cadad1 75%, #7e998d 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      margin-bottom: 0.5rem;
+    }
+
+    .main-subtitle {
+      font-family: var(--font-mono);
+      font-size: clamp(0.85rem, 2.2vw, 1.15rem);
+      font-weight: 600;
+      color: var(--trail-orange);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 2.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .main-subtitle::before,
+    .main-subtitle::after {
+      content: '';
+      display: inline-block;
+      width: 25px;
+      height: 1.5px;
+      background: var(--trail-orange);
+      opacity: 0.7;
+    }
+
+    /* -------------------------------------------------------------
+       THE COUNTDOWN CLOCK
+    ------------------------------------------------------------- */
+    .clock-container {
+      width: 100%;
+      max-width: 920px;
+      background: linear-gradient(145deg, rgba(17, 27, 22, 0.88) 0%, rgba(9, 15, 12, 0.94) 100%);
+      border: 1px solid var(--surface-border);
+      border-radius: 20px;
+      padding: 2.2rem 1.75rem;
+      box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.03);
+      position: relative;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* Tactical Brackets */
+    .corner {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-color: var(--trail-orange);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+    .corner.tl { top: 10px; left: 10px; border-top: 2px solid; border-left: 2px solid; }
+    .corner.tr { top: 10px; right: 10px; border-top: 2px solid; border-right: 2px solid; }
+    .corner.bl { bottom: 10px; left: 10px; border-bottom: 2px solid; border-left: 2px solid; }
+    .corner.br { bottom: 10px; right: 10px; border-bottom: 2px solid; border-right: 2px solid; }
+
+    .clock-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+
+    .time-slot {
+      background: rgba(6, 11, 9, 0.85);
+      border: 1px solid rgba(72, 102, 88, 0.3);
+      border-radius: 14px;
+      padding: 1.8rem 0.5rem;
+      text-align: center;
+      position: relative;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.7);
+      transition: border-color 0.25s ease, transform 0.25s ease;
+      overflow: hidden;
+    }
+
+    .time-slot:hover {
+      border-color: var(--trail-orange);
+      transform: translateY(-2px);
+    }
+
+    /* Mid-line separator slit */
+    .time-slot::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: rgba(0, 0, 0, 0.6);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+      z-index: 1;
+    }
+
+    .time-val {
+      font-family: var(--font-mono);
+      font-size: clamp(2.6rem, 7.5vw, 5.6rem);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      color: #ffffff;
+      text-shadow: 0 0 25px rgba(255, 255, 255, 0.15), 0 4px 15px rgba(0, 0, 0, 0.9);
+      display: block;
+      margin-bottom: 0.6rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .time-val.seconds {
+      color: var(--trail-orange);
+      text-shadow: 0 0 30px var(--trail-glow), 0 4px 15px rgba(0, 0, 0, 0.9);
+    }
+
+    .time-label {
+      font-family: var(--font-accent);
+      font-size: clamp(0.75rem, 1.5vw, 1rem);
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: block;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Sub-bar inside clock */
+    .clock-footer {
+      margin-top: 1.75rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(72, 102, 88, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+
+    .target-callout {
+      color: var(--trail-amber);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .target-callout .blink-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--trail-orange);
+      box-shadow: 0 0 8px var(--trail-orange);
+      animation: blink 1s infinite alternate;
+    }
+
+    @keyframes blink {
+      0% { opacity: 1; }
+      100% { opacity: 0.25; }
+    }
+
+    .status-msg {
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+    }
+
+    /* -------------------------------------------------------------
+       SUBTLE VEHICLE SILHOUETTES AT BASE OF MOUNTAINS
+       (Defender, Land Cruiser, Raptor, Model Y)
+    ------------------------------------------------------------- */
+    /* -------------------------------------------------------------
+       ANIMATED BACKGROUND SCENERY (OFF-ROAD TRAIL, PINES, CAMP, GRILL)
+    ------------------------------------------------------------- */
+    /* Pine tree swaying */
+    .pine-sway-1 {
+      transform-origin: bottom center;
+      animation: pineSway1 6s ease-in-out infinite alternate;
+    }
+    .pine-sway-2 {
+      transform-origin: bottom center;
+      animation: pineSway2 8s 1.2s ease-in-out infinite alternate;
+    }
+    .pine-sway-3 {
+      transform-origin: bottom center;
+      animation: pineSway1 5s 2.4s ease-in-out infinite alternate-reverse;
+    }
+    @keyframes pineSway1 {
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(1.4deg) skewX(0.5deg); }
+      100% { transform: rotate(-1.2deg) skewX(-0.4deg); }
+    }
+    @keyframes pineSway2 {
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(-1.5deg) skewX(-0.6deg); }
+      100% { transform: rotate(1.1deg) skewX(0.4deg); }
+    }
+
+    /* Off-road Traverse Animation across Mountain Trail Shelf */
+    .offroad-trail-shelf {
+      position: absolute;
+      bottom: 21vh;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .trail-vehicle-convoy {
+      position: absolute;
+      bottom: 4px;
+      display: flex;
+      align-items: flex-end;
+      gap: 50px;
+      animation: traverseRidge 38s linear infinite;
+    }
+
+    @keyframes traverseRidge {
+      0% { transform: translateX(-380px); }
+      100% { transform: translateX(calc(100vw + 380px)); }
+    }
+
+    .traversing-rig {
+      position: relative;
+      animation: rigJostle 0.4s ease-in-out infinite alternate;
+      display: inline-block;
+    }
+    .traversing-rig.alt {
+      animation-duration: 0.32s;
+      animation-delay: 0.15s;
+    }
+
+    @keyframes rigJostle {
+      0% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-2px) rotate(0.9deg); }
+      100% { transform: translateY(1px) rotate(-0.5deg); }
+    }
+
+    .traversing-rig svg {
+      height: 32px;
+      fill: #263830;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7));
+    }
+
+    /* Headlight volumetric light cone */
+    .headlight-cone {
+      position: absolute;
+      top: 10px;
+      left: 88%;
+      width: 130px;
+      height: 36px;
+      background: linear-gradient(90deg, rgba(255, 230, 150, 0.42) 0%, rgba(255, 190, 70, 0.12) 60%, transparent 100%);
+      clip-path: polygon(0% 35%, 100% 0%, 100% 100%, 0% 65%);
+      pointer-events: none;
+      filter: blur(2px);
+    }
+    .headlight-cone.electric {
+      background: linear-gradient(90deg, rgba(160, 240, 255, 0.45) 0%, rgba(50, 200, 240, 0.12) 60%, transparent 100%);
+    }
+
+    /* Dust puff behind offroad tires */
+    .dust-puff {
+      position: absolute;
+      bottom: 2px;
+      left: -10px;
+      width: 18px;
+      height: 10px;
+      background: radial-gradient(ellipse, rgba(140, 160, 150, 0.35) 0%, transparent 75%);
+      border-radius: 50%;
+      animation: puffFloat 0.75s ease-out infinite;
+    }
+    .dust-puff.delay {
+      animation-delay: 0.35s;
+    }
+    @keyframes puffFloat {
+      0% { transform: scale(0.6) translateY(0); opacity: 0.5; }
+      100% { transform: scale(2) translateY(-7px) translateX(-12px); opacity: 0; }
+    }
+
+    /* Basecamp Scene at Foreground Bottom */
+    .basecamp-scenery {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 160px;
+      pointer-events: none;
+      z-index: 3;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 max(20px, 4vw) 12px;
+    }
+
+    .camp-cluster {
+      display: flex;
+      align-items: flex-end;
+      gap: 20px;
+      position: relative;
+    }
+
+    /* Campfire Flames & Glow */
+    .campfire-wrap {
+      position: relative;
+      width: 64px;
+      height: 52px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .campfire-glow {
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 70px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 60%, rgba(255, 107, 26, 0.5) 0%, rgba(245, 158, 11, 0.2) 50%, transparent 75%);
+      animation: campGlowPulse 1.3s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes campGlowPulse {
+      0% { transform: translateX(-50%) scale(0.92); opacity: 0.7; }
+      100% { transform: translateX(-50%) scale(1.15); opacity: 1; }
+    }
+
+    .flame-outer {
+      animation: flameAnim1 0.28s ease-in-out infinite alternate;
+      transform-origin: 32px 42px;
+      filter: drop-shadow(0 0 8px rgba(255, 85, 0, 0.8));
+    }
+    .flame-inner {
+      animation: flameAnim2 0.22s ease-in-out infinite alternate-reverse;
+      transform-origin: 32px 42px;
+    }
+
+    @keyframes flameAnim1 {
+      0% { transform: scaleY(1) scaleX(1) rotate(-1deg); }
+      100% { transform: scaleY(1.22) scaleX(0.92) rotate(2deg); }
+    }
+    @keyframes flameAnim2 {
+      0% { transform: scaleY(1.15) scaleX(0.9) rotate(1.5deg); }
+      100% { transform: scaleY(0.9) scaleX(1.08) rotate(-2deg); }
+    }
+
+    /* Camp Grill & Smoke */
+    .grill-wrap {
+      position: relative;
+      width: 50px;
+      height: 46px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .smoke-wisp {
+      position: absolute;
+      bottom: 26px;
+      left: 20px;
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle, rgba(180, 200, 190, 0.35) 0%, transparent 75%);
+      border-radius: 50%;
+      animation: smokeDrift 2.6s ease-out infinite;
+    }
+    .smoke-wisp.wisp-2 {
+      left: 26px;
+      animation-delay: 0.85s;
+      animation-duration: 3.1s;
+    }
+    .smoke-wisp.wisp-3 {
+      left: 16px;
+      animation-delay: 1.7s;
+      animation-duration: 2.9s;
+    }
+
+    @keyframes smokeDrift {
+      0% { opacity: 0; transform: translateY(0) scale(0.6) translateX(0); }
+      25% { opacity: 0.6; }
+      75% { opacity: 0.25; transform: translateY(-30px) scale(1.4) translateX(10px); }
+      100% { opacity: 0; transform: translateY(-48px) scale(1.8) translateX(18px); }
+    }
+
+    /* Tent Lantern Warm Glow */
+    .tent-lantern-glow {
+      animation: lanternPulse 2.8s ease-in-out infinite alternate;
+    }
+    @keyframes lanternPulse {
+      0% { opacity: 0.45; }
+      50% { opacity: 0.8; }
+      100% { opacity: 0.5; }
+    }
+
+    /* -------------------------------------------------------------
+       BOTTOM BAR
+    ------------------------------------------------------------- */
+    .bottom-bar {
+      position: relative;
+      z-index: 10;
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(72, 102, 88, 0.12);
+    }
+
+    /* -------------------------------------------------------------
+       RESPONSIVENESS
+    ------------------------------------------------------------- */
+    @media (max-width: 768px) {
+      .top-telemetry {
+        padding: 1rem 1.25rem;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+      }
+      .tele-right {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .clock-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+      }
+      .clock-container {
+        padding: 1.5rem 1rem;
+      }
+      .time-slot {
+        padding: 1.2rem 0.25rem;
+      }
+      .clock-footer {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+      }
+      .bottom-bar {
+        padding: 1rem 1.25rem;
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+      }
+      .basecamp-scenery {
+        height: 115px;
+        padding: 0 8px 6px;
+      }
+      .camp-cluster {
+        gap: 8px;
+        transform: scale(0.7);
+        transform-origin: bottom center;
+      }
+      .offroad-trail-shelf {
+        bottom: 13vh;
+        height: 45px;
+      }
+      .traversing-rig svg {
+        height: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Ambience & Animated Landscape -->
+  <div class="bg-layers">
+    <div class="topo-grid"></div>
+    <canvas id="particlesCanvas"></canvas>
+    
+    <div class="mist-layer"></div>
+
+    <!-- Mountain Ranges & Pine Forest Vector Skyline -->
+    <svg class="mountain-backdrop" viewBox="0 0 1440 380" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Distant High Ridge -->
+      <path d="M0 240 L180 160 L360 210 L520 130 L720 190 L900 110 L1080 180 L1260 140 L1440 220 V380 H0 Z" fill="#0b130f" opacity="0.6" />
+      <!-- Mid-ground Forest Peaks -->
+      <path d="M0 270 L140 220 L280 250 L460 190 L640 240 L820 180 L980 230 L1180 190 L1340 240 L1440 210 V380 H0 Z" fill="#0f1a14" opacity="0.85" />
+      <!-- Pine Canopy Treeline Silhouette -->
+      <path d="M0 320 L30 300 L60 320 L90 295 L120 320 L150 290 L180 320 L220 305 L260 325 L300 295 L340 325 L380 290 L420 325 L470 300 L520 325 L570 295 L620 325 L670 290 L720 325 L770 300 L820 325 L870 285 L920 325 L970 295 L1020 325 L1080 290 L1140 325 L1200 295 L1260 325 L1320 290 L1380 325 L1440 300 V380 H0 Z" fill="#13221b" />
+      <!-- Dark Foreground Base Ground -->
+      <path d="M0 345 Q 360 330 720 345 T 1440 340 V380 H0 Z" fill="#060a08" />
+    </svg>
+
+    <!-- Moving Off-Road Traverse Ridge Trail -->
+    <div class="offroad-trail-shelf">
+      <div class="trail-vehicle-convoy">
+        <!-- Rig 1: Ford Raptor with High-Stance, Chase Lights, & Headlight Cone -->
+        <div class="traversing-rig">
+          <div class="headlight-cone"></div>
+          <div class="dust-puff"></div>
+          <svg viewBox="0 0 110 45" width="85" height="35">
+            <!-- Chase Rack & LED Bar -->
+            <rect x="42" y="8" width="2" height="12" fill="#ff6b1a" />
+            <rect x="40" y="6" width="18" height="3" rx="1" fill="#facc15" />
+            <!-- Raptor Body -->
+            <path d="M5 32 L5 20 L38 20 L48 10 L75 10 L84 19 L104 20 L105 32 H94 A8 8 0 0 0 78 32 H44 A8 8 0 0 0 28 32 Z" fill="#2d3d34"/>
+            <!-- Windows -->
+            <path d="M50 12 H64 V19 H44 Z" fill="#0c1410"/>
+            <path d="M67 12 H74 L81 19 H67 Z" fill="#0c1410"/>
+            <!-- Wheels with Mud Tires -->
+            <circle cx="36" cy="32" r="7.5" fill="#080e0b" stroke="#374d41" stroke-width="2"/>
+            <circle cx="86" cy="32" r="7.5" fill="#080e0b" stroke="#374d41" stroke-width="2"/>
+            <!-- Amber Grille / Headlight -->
+            <circle cx="103" cy="22" r="2" fill="#ff6b1a" />
+          </svg>
+        </div>
+
+        <!-- Rig 2: Classic Land Rover Defender with Snorkel & Roof Rack -->
+        <div class="traversing-rig alt">
+          <div class="headlight-cone"></div>
+          <div class="dust-puff delay"></div>
+          <svg viewBox="0 0 110 45" width="82" height="35">
+            <!-- Roof Rack -->
+            <rect x="22" y="5" width="55" height="3" rx="1" fill="#71867c"/>
+            <!-- Snorkel -->
+            <path d="M72 7 H75 V25 H78" stroke="#ff6b1a" stroke-width="2" fill="none"/>
+            <!-- Defender Body -->
+            <path d="M8 32 L8 16 L22 9 L75 9 L78 18 L98 20 L98 32 H88 A8 8 0 0 0 72 32 H38 A8 8 0 0 0 22 32 Z" fill="#22322a"/>
+            <!-- Spare Wheel on back -->
+            <rect x="3" y="15" width="5" height="15" rx="2" fill="#141f1a"/>
+            <!-- Wheels -->
+            <circle cx="30" cy="32" r="7.5" fill="#080e0b" stroke="#374d41" stroke-width="2"/>
+            <circle cx="80" cy="32" r="7.5" fill="#080e0b" stroke="#374d41" stroke-width="2"/>
+            <!-- Headlight -->
+            <circle cx="96" cy="22" r="2.5" fill="#fef08a"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Foreground Basecamp Scene (Pines, Tents, Campfire, BBQ Grill, Land Cruiser & Tesla) -->
+    <div class="basecamp-scenery">
+      <!-- Left Basecamp: Swaying Pines, Toyota Land Cruiser with Rooftop Tent, & Ground Tent -->
+      <div class="camp-cluster">
+        <!-- Swaying Pine Group 1 -->
+        <svg viewBox="0 0 80 140" width="58" height="110" class="pine-sway-1">
+          <path d="M40 10 L55 35 L48 35 L65 65 L56 65 L72 105 L45 105 L45 135 L35 135 L35 105 L8 105 L24 65 L15 65 L32 35 L25 35 Z" fill="#0e1b15"/>
+        </svg>
+
+        <!-- Ground Expedition Dome Tent with Glowing Lantern Window -->
+        <div style="position: relative; width: 68px; height: 50px;">
+          <svg viewBox="0 0 70 50" width="68" height="50">
+            <!-- Tent Body -->
+            <polygon points="5,46 35,6 65,46" fill="#16261f" stroke="#2b4236" stroke-width="1.5"/>
+            <path d="M35 6 L35 46" stroke="#2b4236" stroke-width="1"/>
+            <!-- Warm Glowing Tent Flap / Window -->
+            <polygon points="24,46 35,20 46,46" class="tent-lantern-glow" fill="rgba(255, 180, 50, 0.65)"/>
+            <!-- Guy lines -->
+            <line x1="5" y1="46" x2="0" y2="48" stroke="#52635c"/>
+            <line x1="65" y1="46" x2="70" y2="48" stroke="#52635c"/>
+          </svg>
+        </div>
+
+        <!-- Toyota Land Cruiser with Overland Rooftop Tent & Awning -->
+        <div style="position: relative; width: 110px; height: 75px;">
+          <svg viewBox="0 0 120 75" width="110" height="75">
+            <!-- Rooftop Fold-out Tent -->
+            <polygon points="25,28 65,2 105,28" fill="#1a2b22" stroke="#f59e0b" stroke-width="1.2"/>
+            <polygon points="45,28 65,10 85,28" class="tent-lantern-glow" fill="rgba(245, 158, 11, 0.45)"/>
+            <!-- Ladder -->
+            <line x1="90" y1="28" x2="105" y2="62" stroke="#5f756b" stroke-width="1.5"/>
+            <line x1="92" y1="36" x2="96" y2="36" stroke="#5f756b" stroke-width="1"/>
+            <line x1="95" y1="45" x2="99" y2="45" stroke="#5f756b" stroke-width="1"/>
+            <line x1="98" y1="54" x2="102" y2="54" stroke="#5f756b" stroke-width="1"/>
+            <!-- Land Cruiser Body -->
+            <path d="M10 62 L10 38 L30 30 L85 30 L95 38 L114 40 L115 62 H104 A9 9 0 0 0 86 62 H44 A9 9 0 0 0 26 62 Z" fill="#1e2c25"/>
+            <!-- Wheels -->
+            <circle cx="35" cy="62" r="8.5" fill="#090e0b" stroke="#33463c" stroke-width="2"/>
+            <circle cx="95" cy="62" r="8.5" fill="#090e0b" stroke="#33463c" stroke-width="2"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Right Basecamp: Campfire with Flickering Flames, BBQ Grill with Smoke, & Tesla Model Y -->
+      <div class="camp-cluster">
+        <!-- Animated Campfire -->
+        <div class="campfire-wrap">
+          <div class="campfire-glow"></div>
+          <svg viewBox="0 0 64 52" width="64" height="52">
+            <!-- Stones Ring -->
+            <ellipse cx="32" cy="45" rx="24" ry="6" fill="#15201a" stroke="#2a3d33" stroke-width="1.5"/>
+            <!-- Glowing Charcoal Embers -->
+            <ellipse cx="32" cy="44" rx="16" ry="3.5" fill="#ff4400"/>
+            <!-- Fire Logs -->
+            <line x1="16" y1="46" x2="48" y2="42" stroke="#2e2116" stroke-width="4" stroke-linecap="round"/>
+            <line x1="20" y1="42" x2="44" y2="46" stroke="#3b2b1d" stroke-width="3.5" stroke-linecap="round"/>
+            <!-- Animated Flame Tongues -->
+            <path d="M22 43 C22 30 30 18 32 4 C34 18 42 30 42 43 Z" class="flame-outer" fill="#ff5500"/>
+            <path d="M26 43 C26 33 31 24 32 14 C33 24 38 33 38 43 Z" class="flame-inner" fill="#ffb703"/>
+            <circle cx="32" cy="38" r="4" fill="#ffffff" opacity="0.8"/>
+          </svg>
+        </div>
+
+        <!-- Animated Camp BBQ Grill with Rising Smoke -->
+        <div class="grill-wrap">
+          <div class="smoke-wisp"></div>
+          <div class="smoke-wisp wisp-2"></div>
+          <div class="smoke-wisp wisp-3"></div>
+          <svg viewBox="0 0 50 46" width="50" height="46">
+            <!-- Tripod Stand -->
+            <line x1="25" y1="20" x2="10" y2="44" stroke="#485c52" stroke-width="1.8"/>
+            <line x1="25" y1="20" x2="40" y2="44" stroke="#485c52" stroke-width="1.8"/>
+            <line x1="25" y1="20" x2="25" y2="44" stroke="#33423a" stroke-width="1.5"/>
+            <!-- Grill Kettle / Charcoal Bed -->
+            <path d="M12 22 Q 25 32 38 22 Z" fill="#1b2520" stroke="#ff6b1a" stroke-width="1.2"/>
+            <!-- Grill Grate with Orange Sizzle Glow -->
+            <ellipse cx="25" cy="22" rx="14" ry="3.5" fill="#ff6b1a" opacity="0.8"/>
+            <line x1="13" y1="22" x2="37" y2="22" stroke="#fff" stroke-width="0.8" opacity="0.7"/>
+          </svg>
+        </div>
+
+        <!-- Tesla Model Y in Camp Mode with Subtle Tech Lightbar -->
+        <div style="position: relative; width: 95px; height: 55px;">
+          <svg viewBox="0 0 110 55" width="95" height="55">
+            <!-- Slim Roof Rack -->
+            <rect x="28" y="12" width="45" height="2.5" fill="#4d6257" />
+            <!-- Model Y Aerodynamic Body -->
+            <path d="M8 44 C8 32 20 18 45 16 C68 14 85 20 95 28 L104 33 C106 36 106 42 104 44 H92 A8 8 0 0 0 76 44 H38 A8 8 0 0 0 22 44 Z" fill="#1b2822"/>
+            <!-- Cyber Lightbar Glow -->
+            <path d="M96 33 L104 35" stroke="#22c55e" stroke-width="2" stroke-linecap="round"/>
+            <line x1="4" y1="36" x2="8" y2="36" stroke="#ff4422" stroke-width="2" stroke-linecap="round"/>
+            <!-- Wheels -->
+            <circle cx="30" cy="44" r="7.5" fill="#080e0b" stroke="#2c3e34" stroke-width="2"/>
+            <circle cx="84" cy="44" r="7.5" fill="#080e0b" stroke="#2c3e34" stroke-width="2"/>
+            <!-- Ground Power Cable connecting to Camp -->
+            <path d="M6 44 Q -10 46 -22 44" stroke="#22c55e" stroke-width="1.2" stroke-dasharray="3 3" fill="none" opacity="0.6"/>
+          </svg>
+        </div>
+
+        <!-- Swaying Pine Group 2 -->
+        <svg viewBox="0 0 80 140" width="55" height="100" class="pine-sway-2">
+          <path d="M40 15 L52 38 L46 38 L62 68 L54 68 L68 105 L44 105 L44 135 L36 135 L36 105 L12 105 L26 68 L18 68 L34 38 L28 38 Z" fill="#101e18"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Telemetry Status -->
+  <header class="top-telemetry">
+    <div class="tele-left">
+      <span class="pulse-dot"></span>
+      <span class="tele-tag">EXPEDITION STATUS:</span>
+      <span class="tele-val" id="telemetryStatus">T-MINUS ACTIVE</span>
+    </div>
+    <div class="tele-right">
+      <span>Target: TBD</span>
+      <button class="audio-btn" id="audioToggleBtn" title="Ambient Trail Atmosphere">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        <span id="audioBtnText">AUDIO</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Central Countdown Stage -->
+  <main class="hero-stage">
+    
+    <div class="trail-badge">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      <span>OFF-ROAD 4x4 EXPEDITION</span>
+    </div>
+
+    <!-- Title: Ανίκητοι 2026 -->
+    <h1 class="main-title">Ανίκητοι 2026</h1>
+    <div class="main-subtitle" id="subtitleDate">11 ΝΟΕΜΒΡΙΟΥ • 10:00 AM</div>
+
+    <!-- Central Countdown Clock -->
+    <section class="clock-container" aria-label="Αντίστροφη Μέτρηση">
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+
+      <div class="clock-grid" role="timer" aria-live="polite">
+        <div class="time-slot">
+          <span class="time-val" id="daysVal">00</span>
+          <span class="time-label">ΗΜΕΡΕΣ</span>
+        </div>
+        <div class="time-slot">
+          <span class="time-val" id="hoursVal">00</span>
+          <span class="time-label">ΩΡΕΣ</span>
+        </div>
+        <div class="time-slot">
+          <span class="time-val" id="minutesVal">00</span>
+          <span class="time-label">ΛΕΠΤΑ</span>
+        </div>
+        <div class="time-slot">
+          <span class="time-val seconds" id="secondsVal">00</span>
+          <span class="time-label">ΔΕΥΤΕΡΟΛΕΠΤΑ</span>
+        </div>
+      </div>
+
+      <div class="clock-footer">
+        <div class="target-callout">
+          <span class="blink-dot"></span>
+          <span id="targetCalloutText">DEPARTURE: 11 NOVEMBER // 10:00:00 EET</span>
+        </div>
+        <div class="status-msg" id="statusMessage">BASECAMP PREPARATION &amp; ROUTE STAGING</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Bar -->
+  <footer class="bottom-bar">
+    <div>ΑΝΙΚΗΤΟΙ 2026 // GREEK MOUNTAIN FORESTS EXPEDITION</div>
+    <div>TARGET: TBD</div>
+  </footer>
+
+  <!-- Vanilla JavaScript Logic -->
+  <script>
+    /**
+     * DYNAMIC TARGET CALCULATION
+     * Targets November 11 at 10:00:00 AM.
+     * Automatically targets the next upcoming November 11 if already past.
+     */
+    function getNextTargetDate() {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      
+      // Note: JavaScript month index 10 = November
+      let target = new Date(currentYear, 10, 11, 10, 0, 0, 0);
+
+      if (now.getTime() >= target.getTime()) {
+        target = new Date(currentYear + 1, 10, 11, 10, 0, 0, 0);
+      }
+      return target;
+    }
+
+    const targetDate = getNextTargetDate();
+    const targetYear = targetDate.getFullYear();
+
+    // Elements
+    const daysEl = document.getElementById('daysVal');
+    const hoursEl = document.getElementById('hoursVal');
+    const minutesEl = document.getElementById('minutesVal');
+    const secondsEl = document.getElementById('secondsVal');
+    const subtitleDate = document.getElementById('subtitleDate');
+    const targetCalloutText = document.getElementById('targetCalloutText');
+    const telemetryStatus = document.getElementById('telemetryStatus');
+    const statusMessage = document.getElementById('statusMessage');
+    // Display formatted target date
+    subtitleDate.textContent = `11 ΝΟΕΜΒΡΙΟΥ ${targetYear} • 10:00 AM`;
+    targetCalloutText.textContent = `DEPARTURE: 11 NOVEMBER ${targetYear} // 10:00:00 EET`;
+
+    function pad(n) {
+      return n < 10 ? '0' + n : String(n);
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = targetDate.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        daysEl.textContent = '00';
+        hoursEl.textContent = '00';
+        minutesEl.textContent = '00';
+        secondsEl.textContent = '00';
+        telemetryStatus.textContent = 'EXPEDITION UNDERWAY';
+        statusMessage.textContent = 'ENGINES ENGAGED // EN ROUTE';
+        return;
+      }
+
+      const totalSec = Math.floor(diff / 1000);
+      const days = Math.floor(totalSec / (3600 * 24));
+      const hours = Math.floor((totalSec % (3600 * 24)) / 3600);
+      const minutes = Math.floor((totalSec % 3600) / 60);
+      const seconds = totalSec % 60;
+
+      daysEl.textContent = pad(days);
+      hoursEl.textContent = pad(hours);
+      minutesEl.textContent = pad(minutes);
+      secondsEl.textContent = pad(seconds);
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // -------------------------------------------------------------
+    // Canvas: Subtle floating dust & forest embers
+    // -------------------------------------------------------------
+    const canvas = document.getElementById('particlesCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        // 40% of particles spawn as campfire embers from the camp area
+        if (Math.random() < 0.45) {
+          const campOriginX = canvas.width * 0.75 + (Math.random() - 0.5) * 70;
+          this.x = campOriginX;
+          this.y = canvas.height - 25 - Math.random() * 30;
+          this.size = Math.random() * 2.2 + 0.8;
+          this.speedY = -(Math.random() * 1.1 + 0.5);
+          this.speedX = (Math.random() - 0.35) * 0.6;
+          this.opacity = Math.random() * 0.7 + 0.3;
+          this.color = Math.random() > 0.3 ? '255, 107, 26' : '255, 195, 50';
+        } else {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 2 + 0.5;
+          this.speedY = -(Math.random() * 0.4 + 0.15);
+          this.speedX = (Math.random() - 0.5) * 0.3;
+          this.opacity = Math.random() * 0.5 + 0.1;
+          this.color = Math.random() > 0.4 ? '255, 107, 26' : '74, 222, 128';
+        }
+      }
+      update() {
+        this.y += this.speedY;
+        this.x += this.speedX;
+        this.opacity -= 0.0025;
+        if (this.y < 0 || this.opacity <= 0) this.reset();
+        if (this.x < 0) this.x = canvas.width;
+        if (this.x > canvas.width) this.x = 0;
+      }
+      draw() {
+        ctx.fillStyle = `rgba(${this.color}, ${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 45; i++) {
+      particles.push(new Particle());
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // -------------------------------------------------------------
+    // Ambient Audio Synthesizer (Optional subtle mountain breeze)
+    // -------------------------------------------------------------
+    let audioCtx = null;
+    let isPlaying = false;
+    let noiseNode = null;
+    const audioBtn = document.getElementById('audioToggleBtn');
+    const audioBtnText = document.getElementById('audioBtnText');
+
+    function initAudio() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      audioCtx = new AudioCtx();
+
+      const bufferSize = audioCtx.sampleRate * 2;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let b0 = 0, b1 = 0, b2 = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.99 * b0 + white * 0.05;
+        b1 = 0.95 * b1 + white * 0.1;
+        b2 = 0.85 * b2 + white * 0.2;
+        data[i] = (b0 + b1 + b2) * 0.03;
+      }
+
+      noiseNode = audioCtx.createBufferSource();
+      noiseNode.buffer = buffer;
+      noiseNode.loop = true;
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 240;
+
+      const gain = audioCtx.createGain();
+      gain.gain.value = 0.2;
+
+      noiseNode.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+      noiseNode.start();
+    }
+
+    audioBtn.addEventListener('click', () => {
+      if (!audioCtx) {
+        initAudio();
+        isPlaying = true;
+        audioBtn.classList.add('active');
+        audioBtnText.textContent = 'AUDIO: ON';
+      } else {
+        if (isPlaying) {
+          audioCtx.suspend();
+          isPlaying = false;
+          audioBtn.classList.remove('active');
+          audioBtnText.textContent = 'AUDIO';
+        } else {
+          audioCtx.resume();
+          isPlaying = true;
+          audioBtn.classList.add('active');
+          audioBtnText.textContent = 'AUDIO: ON';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
