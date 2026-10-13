@@ -669,28 +669,67 @@
        LOCATIONS LINK
     ------------------------------------------------------------- */
     .route-link {
-      margin-top: 1.4rem;
+      position: relative;
+      margin-top: 1.5rem;
       display: inline-flex;
       align-items: center;
-      gap: 0.6rem;
-      padding: 0.7rem 1.2rem;
+      gap: 0.7rem;
+      padding: 0.95rem 1.6rem;
       font-family: var(--font-mono);
-      font-size: 0.78rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      color: var(--trail-orange);
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: #140a03;
       text-decoration: none;
-      border: 1px solid var(--surface-border-bright);
-      background: rgba(13, 22, 18, 0.75);
-      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #ffb347 0%, var(--trail-orange) 55%, #e5530f 100%);
+      box-shadow: 0 0 0 0 rgba(255, 107, 26, 0.55), 0 8px 26px rgba(255, 107, 26, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      overflow: hidden;
+      isolation: isolate;
+      animation: routePulse 2.2s ease-out infinite;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .route-link::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.55) 48%, transparent 66%);
+      transform: translateX(-120%);
+      animation: routeShine 3.4s ease-in-out infinite;
+      z-index: -1;
+    }
+    .route-link .route-arrow {
+      display: inline-block;
+      animation: routeNudge 1.1s ease-in-out infinite;
+    }
+    .route-link .route-badge {
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      padding: 0.18rem 0.45rem;
+      border-radius: 3px;
+      background: #140a03;
+      color: var(--trail-orange);
+      animation: routeBlink 1.1s ease-in-out infinite alternate;
     }
     .route-link:hover, .route-link:focus-visible {
-      background: var(--trail-orange);
-      color: var(--bg-deep);
-      box-shadow: 0 0 18px var(--trail-glow);
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 0 0 6px rgba(255, 107, 26, 0.25), 0 12px 34px rgba(255, 107, 26, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
       outline: none;
     }
-    .route-link svg { width: 15px; height: 15px; flex: none; }
+    .route-link:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+    .route-link svg { width: 18px; height: 18px; flex: none; }
+    @keyframes routePulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 107, 26, 0.6), 0 8px 26px rgba(255, 107, 26, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+      70% { box-shadow: 0 0 0 16px rgba(255, 107, 26, 0), 0 8px 26px rgba(255, 107, 26, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 107, 26, 0), 0 8px 26px rgba(255, 107, 26, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+    }
+    @keyframes routeShine { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
+    @keyframes routeNudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+    @keyframes routeBlink { from { opacity: 1; box-shadow: 0 0 8px rgba(20,10,3,.6); } to { opacity: 0.35; } }
+    @media (prefers-reduced-motion: reduce) {
+      .route-link, .route-link::before, .route-link .route-arrow, .route-link .route-badge { animation: none; }
+    }
 
     /* -------------------------------------------------------------
        BOTTOM BAR
@@ -843,7 +882,9 @@
 
     <a class="route-link" href="platomata.html">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20l6-12 4 7 3-4 5 9H3z"/></svg>
-      <span>ΥΠΟΨΗΦΙΑ ΣΗΜΕΙΑ ΚΑΤΑΣΚΗΝΩΣΗΣ →</span>
+      <span class="route-badge">NEW</span>
+      <span>ΥΠΟΨΗΦΙΑ ΣΗΜΕΙΑ ΚΑΤΑΣΚΗΝΩΣΗΣ</span>
+      <span class="route-arrow" aria-hidden="true">→</span>
     </a>
 
   </main>
