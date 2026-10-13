@@ -67,11 +67,19 @@
       overflow: hidden;
     }
 
+    #sceneCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
     /* Subtle Topographic Contours */
     .topo-grid {
       position: absolute;
       inset: 0;
-      opacity: 0.12;
+      opacity: 0.05;
       background-image: url("data:image/svg+xml,%3Csvg width='360' height='360' viewBox='0 0 360 360' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 90 Q 90 30 180 90 T 360 90 M0 180 Q 110 110 200 180 T 360 180 M0 270 Q 90 330 180 270 T 360 270' fill='none' stroke='%23ff6b1a' stroke-width='0.6'/%3E%3Cpath d='M0 45 Q 70 110 160 50 T 340 70 M30 220 Q 140 160 250 220 T 360 250' fill='none' stroke='%2322c55e' stroke-width='0.5'/%3E%3C/svg%3E");
       background-size: 540px 540px;
     }
@@ -762,275 +770,12 @@
 </head>
 <body>
 
-  <!-- Shared vehicle defs: wheels and paint gradients -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-    <defs>
-      <linearGradient id="paintGreenA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#55745a"/><stop offset=".45" stop-color="#34503a"/><stop offset="1" stop-color="#1c2d20"/></linearGradient>
-      <linearGradient id="paintGreenB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f6d55"/><stop offset=".5" stop-color="#304a36"/><stop offset="1" stop-color="#1a291e"/></linearGradient>
-      <linearGradient id="paintGreyA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a7afb4"/><stop offset=".45" stop-color="#7a8287"/><stop offset="1" stop-color="#43494d"/></linearGradient>
-      <linearGradient id="paintGreyB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b3babe"/><stop offset=".5" stop-color="#858d91"/><stop offset="1" stop-color="#4b5155"/></linearGradient>
-      <linearGradient id="paintBlack" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a525a"/><stop offset=".35" stop-color="#1e2226"/><stop offset="1" stop-color="#0a0b0d"/></linearGradient>
-      <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2c3a40"/><stop offset=".55" stop-color="#0d1316"/><stop offset="1" stop-color="#080b0d"/></linearGradient>
-      <symbol id="wSteel" viewBox="-16 -16 32 32">
-        <circle r="15.6" fill="#0a0e0c"/>
-        <circle r="14" fill="none" stroke="#222b26" stroke-width="2.6" stroke-dasharray="2.2 1.9"/>
-        <circle r="8.8" fill="#2b3530"/><circle r="8.8" fill="none" stroke="#4a5852" stroke-width="1"/>
-        <g fill="#111714"><circle cy="-5" r="1.5"/><circle cx="4.76" cy="-1.55" r="1.5"/><circle cx="2.94" cy="4.05" r="1.5"/><circle cx="-2.94" cy="4.05" r="1.5"/><circle cx="-4.76" cy="-1.55" r="1.5"/></g>
-        <circle r="2.3" fill="#56645d"/>
-      </symbol>
-      <symbol id="wSteelR" viewBox="-16 -16 32 32">
-        <g class="spin">
-        <circle r="15.6" fill="#0a0e0c"/>
-        <circle r="14" fill="none" stroke="#222b26" stroke-width="2.6" stroke-dasharray="2.2 1.9"/>
-        <circle r="8.8" fill="#2b3530"/><circle r="8.8" fill="none" stroke="#4a5852" stroke-width="1"/>
-        <g fill="#111714"><circle cy="-5" r="1.5"/><circle cx="4.76" cy="-1.55" r="1.5"/><circle cx="2.94" cy="4.05" r="1.5"/><circle cx="-2.94" cy="4.05" r="1.5"/><circle cx="-4.76" cy="-1.55" r="1.5"/></g>
-        <circle r="2.3" fill="#56645d"/>
-        </g>
-      </symbol>
-      <symbol id="wAlloy" viewBox="-16 -16 32 32">
-        <circle r="15.6" fill="#090b0c"/>
-        <circle r="14.1" fill="none" stroke="#20262a" stroke-width="2.4" stroke-dasharray="2.6 1.7"/>
-        <circle r="9.6" fill="#15191c"/><circle r="9.6" fill="none" stroke="#8e989f" stroke-width="1.3"/>
-        <path d="M0-8.8V-3M0 8.8V3M7.6-4.4L2.6-1.5M-7.6 4.4L-2.6 1.5M7.6 4.4L2.6 1.5M-7.6-4.4L-2.6-1.5" stroke="#9aa4ab" stroke-width="2.6" stroke-linecap="round"/>
-        <circle r="2.6" fill="#77828a"/>
-      </symbol>
-      <symbol id="wAlloyR" viewBox="-16 -16 32 32">
-        <g class="spin">
-        <circle r="15.6" fill="#090b0c"/>
-        <circle r="14.1" fill="none" stroke="#20262a" stroke-width="2.4" stroke-dasharray="2.6 1.7"/>
-        <circle r="9.6" fill="#15191c"/><circle r="9.6" fill="none" stroke="#8e989f" stroke-width="1.3"/>
-        <path d="M0-8.8V-3M0 8.8V3M7.6-4.4L2.6-1.5M-7.6 4.4L-2.6 1.5M7.6 4.4L2.6 1.5M-7.6-4.4L-2.6-1.5" stroke="#9aa4ab" stroke-width="2.6" stroke-linecap="round"/>
-        <circle r="2.6" fill="#77828a"/>
-        </g>
-      </symbol>
-      <symbol id="wAero" viewBox="-16 -16 32 32">
-        <circle r="15.6" fill="#08090a"/>
-        <circle r="11.2" fill="#1d2125"/><circle r="11.2" fill="none" stroke="#565e65" stroke-width="1"/>
-        <path d="M0-10.5Q3-6 1.2-1.6M10-3.2Q5.2-.6 1.7.6M6.2 8.5Q3 4.4 1 1.4M-6.2 8.5Q-4.6 3.8-1 1.4M-10-3.2Q-5.6-3.8-1.7.6" stroke="#3b4248" stroke-width="2" fill="none" stroke-linecap="round"/>
-        <circle r="2.4" fill="#3a4046"/>
-      </symbol>
-    </defs>
-  </svg>
 
   <!-- Background Ambience & Animated Landscape -->
   <div class="bg-layers">
+    <canvas id="sceneCanvas" aria-hidden="true"></canvas>
     <div class="topo-grid"></div>
     <canvas id="particlesCanvas"></canvas>
-    
-    <div class="mist-layer"></div>
-
-    <!-- Mountain Ranges & Pine Forest Vector Skyline -->
-    <svg class="mountain-backdrop" viewBox="0 0 1440 380" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Distant High Ridge -->
-      <path d="M0 240 L180 160 L360 210 L520 130 L720 190 L900 110 L1080 180 L1260 140 L1440 220 V380 H0 Z" fill="#0b130f" opacity="0.6" />
-      <!-- Mid-ground Forest Peaks -->
-      <path d="M0 270 L140 220 L280 250 L460 190 L640 240 L820 180 L980 230 L1180 190 L1340 240 L1440 210 V380 H0 Z" fill="#0f1a14" opacity="0.85" />
-      <!-- Pine Canopy Treeline Silhouette -->
-      <path d="M0 320 L30 300 L60 320 L90 295 L120 320 L150 290 L180 320 L220 305 L260 325 L300 295 L340 325 L380 290 L420 325 L470 300 L520 325 L570 295 L620 325 L670 290 L720 325 L770 300 L820 325 L870 285 L920 325 L970 295 L1020 325 L1080 290 L1140 325 L1200 295 L1260 325 L1320 290 L1380 325 L1440 300 V380 H0 Z" fill="#13221b" />
-      <!-- Dark Foreground Base Ground -->
-      <path d="M0 345 Q 360 330 720 345 T 1440 340 V380 H0 Z" fill="#060a08" />
-    </svg>
-
-    <!-- Moving Off-Road Traverse Ridge Trail -->
-    <div class="offroad-trail-shelf">
-      <div class="trail-vehicle-convoy">
-        <!-- Rig 1: grey modern full-size SUV -->
-        <div class="traversing-rig alt2">
-          <div class="headlight-cone"></div>
-          <div class="dust-puff"></div>
-          <svg viewBox="0 0 176 80" width="116" height="53" class="rolling" aria-hidden="true">
-            <ellipse cx="88" cy="74" rx="78" ry="3.5" fill="#000" opacity=".55"/>
-            <g fill="#1f2326"><rect x="22" y="10.5" width="82" height="2.6" rx="1.3"/><rect x="26" y="12" width="2.4" height="4"/><rect x="98" y="12" width="2.4" height="4"/></g>
-            <path d="M10 60V22Q10 16 17 15H111Q114 15 116 17L130 33H163Q168 33 168 38V56Q168 60 164 60Z" fill="url(#paintGreyB)"/>
-            <path d="M14 15.8H111Q113.5 15.8 115 17.6L129.4 33.2H163" stroke="#e1e6e9" stroke-width="1" fill="none" opacity=".55"/>
-            <path d="M16 19H38V31H16ZM42 19H72V31H42ZM76 19H110L121 31H76Z" fill="url(#glass)"/>
-            <path d="M80 20H90L84 30H78Z" fill="#fff" opacity=".08"/>
-            <path d="M10 37H168" stroke="#3d4346" stroke-width="1"/>
-            <path d="M40 19V58M74 19V58" stroke="#3d4346" stroke-width=".8"/>
-            <g fill="#2a2f32"><rect x="64" y="40" width="6" height="1.6" rx=".8"/><rect x="100" y="40" width="6" height="1.6" rx=".8"/></g>
-            <path d="M122 30L127 28.5V32Z" fill="#14171a"/>
-            <rect x="10" y="23" width="2.4" height="12" fill="#c8281c"/>
-            <path d="M22 60V49Q22 43 28 43H52Q58 43 58 49V60ZM118 60V49Q118 43 124 43H148Q154 43 154 49V60Z" fill="#16191b"/>
-            <rect x="10" y="53" width="158" height="7" fill="#1b1e20" opacity=".9"/>
-            <rect x="58" y="60" width="60" height="3" rx="1.2" fill="#202427"/>
-            <rect x="163" y="38" width="5" height="15" fill="#0e1012"/>
-            <path d="M149 35.6H167.5" stroke="#f1f8ff" stroke-width="2.2" stroke-linecap="round"/>
-            <use href="#wAlloyR" x="26" y="46" width="28" height="28"/>
-            <use href="#wAlloyR" x="122" y="46" width="28" height="28"/>
-          </svg>
-        </div>
-
-        <!-- Rig 2: dark green classic boxy 4x4 with snorkel and roof rack -->
-        <div class="traversing-rig alt">
-          <div class="headlight-cone"></div>
-          <div class="dust-puff delay"></div>
-          <svg viewBox="0 0 164 80" width="108" height="53" class="rolling" aria-hidden="true">
-            <ellipse cx="84" cy="74" rx="74" ry="3.5" fill="#000" opacity=".55"/>
-            <g stroke="#262c28" stroke-width="2"><path d="M18 12H100M22 12V17M60 12V17M96 12V17"/></g>
-            <rect x="30" y="6.5" width="22" height="5.5" rx="1" fill="#39413a"/><rect x="56" y="7.5" width="14" height="4.5" rx="1" fill="#4b3a22"/>
-            <rect x="4" y="27" width="9" height="24" rx="3.5" fill="#0b0f0d"/><path d="M6 29V49" stroke="#1d2620" stroke-width="2" stroke-dasharray="2 1.6"/>
-            <path d="M12 60V21Q12 17 16 17H102Q104 17 105 19L111 36H149Q153 36 153 40V60Z" fill="url(#paintGreenA)"/>
-            <path d="M13.5 17.8H102L109.8 35.4H150" stroke="#9cbc9a" stroke-width="1" fill="none" opacity=".5"/>
-            <path d="M18 22H44V35H18ZM48 22H74V35H48ZM79 22H100L106 35H79Z" fill="url(#glass)"/>
-            <path d="M50 23H58L52 34H48Z" fill="#fff" opacity=".07"/>
-            <path d="M12 38.5H153" stroke="#1a2a1d" stroke-width="1"/>
-            <path d="M46.5 22V58M77 22V58" stroke="#1a2a1d" stroke-width=".9"/>
-            <g fill="#a9b6aa" opacity=".55"><rect x="38" y="41" width="5" height="1.4"/><rect x="70" y="41" width="5" height="1.4"/></g>
-            <g stroke="#1e2d21" stroke-width=".8"><path d="M116 41H146M116 44H146"/></g>
-            <path d="M22 60V50Q22 44 28 44H50Q56 44 56 50V60ZM113 60V50Q113 44 119 44H141Q147 44 147 50V60Z" fill="#111813"/>
-            <rect x="8" y="55" width="11" height="5" fill="#191c1a"/><rect x="139" y="55" width="18" height="7" rx="1" fill="#191c1a"/>
-            <rect x="58" y="60" width="52" height="3" fill="#151916"/>
-            <path d="M113.5 52V40L107 21V9.5H114" stroke="#121714" stroke-width="3.2" fill="none" stroke-linejoin="round"/>
-            <circle cx="149.5" cy="44" r="5.5" fill="#fff4c2" opacity=".18"/><circle cx="149.5" cy="44" r="3.4" fill="#fff4c2"/>
-            <rect x="147.5" y="49.5" width="4" height="2" rx=".6" fill="#f59e0b"/>
-            <use href="#wSteelR" x="25.5" y="46.5" width="27" height="27"/>
-            <use href="#wSteelR" x="116.5" y="46.5" width="27" height="27"/>
-          </svg>
-        </div>
-
-        <!-- Rig 3: grey modern pickup with sport bar and roof marker lights -->
-        <div class="traversing-rig">
-          <div class="headlight-cone"></div>
-          <div class="dust-puff"></div>
-          <svg viewBox="0 0 200 80" width="128" height="51" class="rolling" aria-hidden="true">
-            <ellipse cx="100" cy="74" rx="92" ry="3.5" fill="#000" opacity=".55"/>
-            <path d="M50 32L56 20H75L77 30" stroke="#1b1f22" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
-            <path d="M8 60V34Q8 32 10 32H77L80 15Q81 13 84 13H120Q123 13 125 15L143 32H182Q188 33 189 38V55Q189 60 184 60Z" fill="url(#paintGreyA)"/>
-            <path d="M9 32.8H77M81 13.8H121L142 32.4H183" stroke="#dde3e6" stroke-width="1" fill="none" opacity=".5"/>
-            <path d="M84 17H101V30H82.5ZM105 17H121L135.5 30H105Z" fill="url(#glass)"/>
-            <path d="M108 18H116L110 29H106Z" fill="#fff" opacity=".08"/>
-            <rect x="101" y="16" width="4" height="15" fill="#14181a"/>
-            <g fill="#f59e0b"><rect x="104" y="11.4" width="3" height="1.6" rx=".6"/><rect x="109" y="11.4" width="3" height="1.6" rx=".6"/><rect x="114" y="11.4" width="3" height="1.6" rx=".6"/></g>
-            <path d="M10 35H77M78 36H189" stroke="#41474b" stroke-width="1"/>
-            <path d="M103 31V56M13 34V56" stroke="#41474b" stroke-width=".8"/>
-            <g fill="#2b3134"><rect x="93" y="40" width="6" height="1.6" rx=".8"/><rect x="127" y="40" width="6" height="1.6" rx=".8"/></g>
-            <path d="M136 29.5L142 27.5V32Z" fill="#121517"/>
-            <rect x="8" y="35" width="2.6" height="11" fill="#d42c1f"/>
-            <path d="M22 60L25 47Q27 42 33 42H55Q61 42 63 47L66 60ZM136 60L139 47Q141 42 147 42H169Q175 42 177 47L180 60Z" fill="#141719"/>
-            <rect x="8" y="54" width="181" height="6" fill="#1c2023" opacity=".9"/>
-            <rect x="66" y="60" width="70" height="3" rx="1.2" fill="#1d2124"/>
-            <rect x="182" y="38" width="7" height="16" rx="1" fill="#0d0f11"/>
-            <path d="M176 36.5L188.5 38" stroke="#f1f8ff" stroke-width="2.2" stroke-linecap="round"/>
-            <path d="M183 41.5H188M183 44.5H188" stroke="#f59e0b" stroke-width="1.2"/>
-            <use href="#wAlloyR" x="29" y="45" width="30" height="30"/>
-            <use href="#wAlloyR" x="143" y="45" width="30" height="30"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-
-    <!-- Foreground Basecamp Scene (Pines, Tents, Campfire, BBQ Grill, Wagon & Crossover) -->
-    <div class="basecamp-scenery">
-      <!-- Left Basecamp: Swaying Pines, Wagon with Rooftop Tent, & Ground Tent -->
-      <div class="camp-cluster">
-        <!-- Swaying Pine Group 1 -->
-        <svg viewBox="0 0 80 140" width="58" height="110" class="pine-sway-1">
-          <path d="M40 10 L55 35 L48 35 L65 65 L56 65 L72 105 L45 105 L45 135 L35 135 L35 105 L8 105 L24 65 L15 65 L32 35 L25 35 Z" fill="#0e1b15"/>
-        </svg>
-
-        <!-- Ground Expedition Dome Tent with Glowing Lantern Window -->
-        <div style="position: relative; width: 68px; height: 50px;">
-          <svg viewBox="0 0 70 50" width="68" height="50">
-            <!-- Tent Body -->
-            <polygon points="5,46 35,6 65,46" fill="#16261f" stroke="#2b4236" stroke-width="1.5"/>
-            <path d="M35 6 L35 46" stroke="#2b4236" stroke-width="1"/>
-            <!-- Warm Glowing Tent Flap / Window -->
-            <polygon points="24,46 35,20 46,46" class="tent-lantern-glow" fill="rgba(255, 180, 50, 0.65)"/>
-            <!-- Guy lines -->
-            <line x1="5" y1="46" x2="0" y2="48" stroke="#52635c"/>
-            <line x1="65" y1="46" x2="70" y2="48" stroke="#52635c"/>
-          </svg>
-        </div>
-
-        <!-- Dark green classic wagon with overland rooftop tent -->
-        <div style="position: relative; width: 140px; height: 83px;">
-          <svg viewBox="0 0 176 104" width="140" height="83" aria-hidden="true">
-            <ellipse cx="88" cy="98" rx="80" ry="3.5" fill="#000" opacity=".55"/>
-            <path d="M24 37L10 86M29 37L15 86" stroke="#5f756b" stroke-width="1.4"/>
-            <path d="M23 45H28M20 55H25M17 65H22M14 75H19" stroke="#5f756b" stroke-width="1.1"/>
-            <rect x="20" y="37" width="88" height="5" rx="1.5" fill="#1d2a22"/>
-            <polygon points="22,37 64,7 106,37" fill="#2a3c31" stroke="#f59e0b" stroke-width="1.2"/>
-            <polygon points="46,37 64,16 82,37" class="tent-lantern-glow" fill="rgba(245, 158, 11, 0.5)"/>
-            <rect x="4" y="51" width="8" height="22" rx="3.5" fill="#0b0f0d"/>
-            <path d="M10 85V48Q10 43 15 42H112Q115 42 116 44L124 60H160Q166 60 167 65V82Q167 85 163 85Z" fill="url(#paintGreenB)"/>
-            <path d="M11.5 43H112Q114.4 43 115.3 44.8L123.4 60.6H161" stroke="#9cbc9a" stroke-width="1" fill="none" opacity=".45"/>
-            <path d="M16 46H44V58H16ZM48 46H76V58H48ZM80 46H111L117.5 58H80Z" fill="url(#glass)"/>
-            <path d="M82 47H90L85 57H80Z" fill="#fff" opacity=".07"/>
-            <path d="M12 62H166" stroke="#a8bca8" stroke-width=".8" opacity=".45"/>
-            <path d="M46 46V82M78 46V82" stroke="#18261b" stroke-width=".9"/>
-            <path d="M24 85V76Q24 69 31 69H49Q56 69 56 76V85ZM120 85V76Q120 69 127 69H145Q152 69 152 76V85Z" fill="#111813"/>
-            <rect x="7" y="80" width="12" height="5" fill="#1b1e1c"/><rect x="152" y="80" width="18" height="6" rx="1" fill="#2b302d"/>
-            <circle cx="161.5" cy="67" r="5" fill="#fff4c2" opacity=".14"/><circle cx="161.5" cy="67" r="3.1" fill="#fff4c2" opacity=".85"/>
-            <use href="#wSteel" x="26.5" y="71.5" width="27" height="27"/>
-            <use href="#wSteel" x="122.5" y="71.5" width="27" height="27"/>
-          </svg>
-        </div>
-      </div>
-
-      <!-- Right Basecamp: Campfire, BBQ Grill with Smoke, & Electric Crossover -->
-      <div class="camp-cluster">
-        <!-- Animated Campfire -->
-        <div class="campfire-wrap">
-          <div class="campfire-glow"></div>
-          <svg viewBox="0 0 64 52" width="64" height="52">
-            <!-- Stones Ring -->
-            <ellipse cx="32" cy="45" rx="24" ry="6" fill="#15201a" stroke="#2a3d33" stroke-width="1.5"/>
-            <!-- Glowing Charcoal Embers -->
-            <ellipse cx="32" cy="44" rx="16" ry="3.5" fill="#ff4400"/>
-            <!-- Fire Logs -->
-            <line x1="16" y1="46" x2="48" y2="42" stroke="#2e2116" stroke-width="4" stroke-linecap="round"/>
-            <line x1="20" y1="42" x2="44" y2="46" stroke="#3b2b1d" stroke-width="3.5" stroke-linecap="round"/>
-            <!-- Animated Flame Tongues -->
-            <path d="M22 43 C22 30 30 18 32 4 C34 18 42 30 42 43 Z" class="flame-outer" fill="#ff5500"/>
-            <path d="M26 43 C26 33 31 24 32 14 C33 24 38 33 38 43 Z" class="flame-inner" fill="#ffb703"/>
-            <circle cx="32" cy="38" r="4" fill="#ffffff" opacity="0.8"/>
-          </svg>
-        </div>
-
-        <!-- Animated Camp BBQ Grill with Rising Smoke -->
-        <div class="grill-wrap">
-          <div class="smoke-wisp"></div>
-          <div class="smoke-wisp wisp-2"></div>
-          <div class="smoke-wisp wisp-3"></div>
-          <svg viewBox="0 0 50 46" width="50" height="46">
-            <!-- Tripod Stand -->
-            <line x1="25" y1="20" x2="10" y2="44" stroke="#485c52" stroke-width="1.8"/>
-            <line x1="25" y1="20" x2="40" y2="44" stroke="#485c52" stroke-width="1.8"/>
-            <line x1="25" y1="20" x2="25" y2="44" stroke="#33423a" stroke-width="1.5"/>
-            <!-- Grill Kettle / Charcoal Bed -->
-            <path d="M12 22 Q 25 32 38 22 Z" fill="#1b2520" stroke="#ff6b1a" stroke-width="1.2"/>
-            <!-- Grill Grate with Orange Sizzle Glow -->
-            <ellipse cx="25" cy="22" rx="14" ry="3.5" fill="#ff6b1a" opacity="0.8"/>
-            <line x1="13" y1="22" x2="37" y2="22" stroke="#fff" stroke-width="0.8" opacity="0.7"/>
-          </svg>
-        </div>
-
-        <!-- Black electric crossover in camp mode -->
-        <div style="position: relative; width: 118px; height: 52px;">
-          <svg viewBox="0 0 160 70" width="118" height="52" aria-hidden="true" overflow="visible">
-            <ellipse cx="80" cy="65" rx="72" ry="3.2" fill="#000" opacity=".55"/>
-            <path d="M8 52C7 44 10 40 18 38L36 33C50 20 70 15 90 15C108 15 122 22 134 31L146 35C152 37 154 42 153 48L152 52Z" fill="url(#paintBlack)"/>
-            <path d="M42 33C54 22 70 19 88 19C103 19 115 24 126 32Z" fill="url(#glass)"/>
-            <path d="M60 23C70 20 80 19.5 88 19.6L80 31H54Z" fill="#9fb4c2" opacity=".08"/>
-            <path d="M36 33C50 20 70 15 90 15C108 15 122 22 134 31" stroke="#9aa6af" stroke-width="1" fill="none" opacity=".55"/>
-            <path d="M85 20V33M85 34V49" stroke="#000" stroke-width=".8"/>
-            <path d="M18 38.5H146" stroke="#2f353b" stroke-width=".8"/>
-            <g fill="#3c444b"><rect x="62" y="37" width="7" height="1.4" rx=".7"/><rect x="100" y="37" width="7" height="1.4" rx=".7"/></g>
-            <path d="M22 52A16 16 0 0 1 54 52ZM106 52A16 16 0 0 1 138 52Z" fill="#050607"/>
-            <path d="M138 34L150 37.4" stroke="#eaf6ff" stroke-width="1.7" stroke-linecap="round"/>
-            <path d="M9.5 39.5L22 37" stroke="#ff3b2f" stroke-width="1.8" stroke-linecap="round"/>
-            <use href="#wAero" x="25" y="39" width="26" height="26"/>
-            <use href="#wAero" x="109" y="39" width="26" height="26"/>
-            <path d="M7 52Q-8 54-22 52" stroke="#22c55e" stroke-width="1.2" stroke-dasharray="3 3" fill="none" opacity="0.6"/>
-          </svg>
-        </div>
-
-        <!-- Swaying Pine Group 2 -->
-        <svg viewBox="0 0 80 140" width="55" height="100" class="pine-sway-2">
-          <path d="M40 15 L52 38 L46 38 L62 68 L54 68 L68 105 L44 105 L44 135 L36 135 L36 105 L12 105 L26 68 L18 68 L34 38 L28 38 Z" fill="#101e18"/>
-        </svg>
-      </div>
-    </div>
   </div>
 
   <!-- Top Telemetry Status -->
@@ -1310,6 +1055,608 @@
         }
       }
     });
+  </script>
+  <!-- Procedural landscape, trail and convoy renderer -->
+  <script>
+  (() => {
+    const cv = document.getElementById('sceneCanvas');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---------- utilities ---------- */
+    function rng(seed) {
+      return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    }
+    function noise1(seed) {
+      const r = rng(seed), P = new Float32Array(1024);
+      for (let i = 0; i < 1024; i++) P[i] = r();
+      return x => { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f);
+        const a = P[i & 1023], b = P[(i + 1) & 1023]; return a + (b - a) * u; };
+    }
+    function fbm(n, x, oct) { let s = 0, a = 1, f = 1, t = 0;
+      for (let o = 0; o < oct; o++) { s += a * n(x * f); t += a; a *= 0.5; f *= 2.07; } return s / t; }
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const lerp = (a, b, t) => a + (b - a) * t;
+
+    /* ---------- vector assets ---------- */
+    const DEFS = `<defs>
+      <linearGradient id="pgA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b7c60"/><stop offset=".42" stop-color="#36533c"/><stop offset="1" stop-color="#1b2c1f"/></linearGradient>
+      <linearGradient id="pgB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#557459"/><stop offset=".5" stop-color="#314b37"/><stop offset="1" stop-color="#19281d"/></linearGradient>
+      <linearGradient id="pyA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9c1c6"/><stop offset=".4" stop-color="#848c91"/><stop offset="1" stop-color="#41474b"/></linearGradient>
+      <linearGradient id="pyB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c4cbcf"/><stop offset=".45" stop-color="#8f979b"/><stop offset="1" stop-color="#4a5054"/></linearGradient>
+      <linearGradient id="pk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#58616a"/><stop offset=".3" stop-color="#22272c"/><stop offset="1" stop-color="#090a0c"/></linearGradient>
+      <linearGradient id="gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a4c54"/><stop offset=".5" stop-color="#10181c"/><stop offset="1" stop-color="#06090b"/></linearGradient>
+      <linearGradient id="tf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c0602a"/><stop offset=".6" stop-color="#7d3514"/><stop offset="1" stop-color="#3a1808"/></linearGradient>
+      <radialGradient id="rimS" r=".5"><stop offset=".6" stop-color="#3a4640"/><stop offset="1" stop-color="#1e2622"/></radialGradient>
+      <symbol id="wSteel" viewBox="-16 -16 32 32">
+        <circle r="15.6" fill="#0a0d0c"/><circle r="14" fill="none" stroke="#262f2a" stroke-width="2.8" stroke-dasharray="2.3 1.8"/>
+        <circle r="15.6" fill="none" stroke="#3b4741" stroke-width=".6" opacity=".6"/>
+        <circle r="8.9" fill="url(#rimS)"/><circle r="8.9" fill="none" stroke="#5a6a62" stroke-width="1.1"/>
+        <g fill="#0f1412"><circle cy="-5.2" r="1.6"/><circle cx="4.95" cy="-1.6" r="1.6"/><circle cx="3.05" cy="4.2" r="1.6"/><circle cx="-3.05" cy="4.2" r="1.6"/><circle cx="-4.95" cy="-1.6" r="1.6"/></g>
+        <circle r="2.5" fill="#6a7a72"/><circle r="1" fill="#2a332e"/>
+      </symbol>
+      <symbol id="wAlloy" viewBox="-16 -16 32 32">
+        <circle r="15.6" fill="#08090a"/><circle r="14.1" fill="none" stroke="#232a2e" stroke-width="2.6" stroke-dasharray="2.8 1.6"/>
+        <circle r="15.6" fill="none" stroke="#3e464b" stroke-width=".6" opacity=".6"/>
+        <circle r="9.8" fill="#121618"/><circle r="9.8" fill="none" stroke="#a6b0b6" stroke-width="1.3"/>
+        <path d="M0-9V-3M0 9V3M7.8-4.5L2.6-1.5M-7.8 4.5L-2.6 1.5M7.8 4.5L2.6 1.5M-7.8-4.5L-2.6-1.5" stroke="#b3bdc3" stroke-width="2.8" stroke-linecap="round"/>
+        <circle r="2.8" fill="#8a959c"/><circle r="1.1" fill="#2c3236"/>
+      </symbol>
+      <symbol id="wAero" viewBox="-16 -16 32 32">
+        <circle r="15.6" fill="#07080a"/><circle r="11.4" fill="#1e2226"/><circle r="11.4" fill="none" stroke="#5d666d" stroke-width="1"/>
+        <path d="M0-10.6Q3-6 1.2-1.6M10.1-3.3Q5.2-.6 1.7.6M6.3 8.6Q3 4.4 1 1.4M-6.3 8.6Q-4.6 3.8-1 1.4M-10.1-3.3Q-5.6-3.8-1.7.6" stroke="#3f474e" stroke-width="2.1" fill="none" stroke-linecap="round"/>
+        <circle r="2.4" fill="#40474d"/>
+      </symbol></defs>`;
+    const svgDoc = (vb, body, k = 5) => {
+      const [x, y, w, h] = vb;
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${x} ${y} ${w} ${h}" width="${w * k}" height="${h * k}">${DEFS}${body}</svg>`;
+    };
+
+    const VEHICLES = [
+      { id: 'suv', vb: [0, 0, 176, 80], wheel: 'wAlloy', ws: 28, wx: [40, 136], wy: 60, head: [167.5, 35.6], tail: [11, 28], speed: 1.0,
+        body: `<g fill="#1d2124"><rect x="22" y="10.5" width="82" height="2.6" rx="1.3"/><rect x="26" y="12" width="2.4" height="4"/><rect x="62" y="12" width="2.4" height="4"/><rect x="98" y="12" width="2.4" height="4"/></g>
+          <rect x="34" y="6.5" width="40" height="4.2" rx="1.4" fill="#2a2f33"/>
+          <path d="M10 60V22Q10 16 17 15H111Q114 15 116 17L130 33H163Q168 33 168 38V56Q168 60 164 60Z" fill="url(#pyB)"/>
+          <path d="M14 15.8H111Q113.5 15.8 115 17.6L129.4 33.2H163" stroke="#f2f6f8" stroke-width="1.1" fill="none" opacity=".6"/>
+          <path d="M16 19H38V31H16ZM42 19H72V31H42ZM76 19H110L121 31H76Z" fill="url(#gl)"/>
+          <path d="M80 20H90L84 30H78ZM45 20H52L47 30H43Z" fill="#fff" opacity=".09"/>
+          <path d="M10 37H168" stroke="#3d4346" stroke-width="1"/><path d="M12 44.5H166" stroke="#ffffff" stroke-width=".7" opacity=".14"/>
+          <path d="M40 19V58M74 19V58" stroke="#3d4346" stroke-width=".8"/>
+          <g fill="#2a2f32"><rect x="64" y="40" width="6" height="1.6" rx=".8"/><rect x="100" y="40" width="6" height="1.6" rx=".8"/></g>
+          <path d="M122 30L128 28.4V32.4Z" fill="#14171a"/>
+          <rect x="10" y="22" width="2.6" height="13" rx="1" fill="#c8281c"/>
+          <path d="M22 60V49Q22 43 28 43H52Q58 43 58 49V60ZM118 60V49Q118 43 124 43H148Q154 43 154 49V60Z" fill="#141719"/>
+          <rect x="10" y="53" width="158" height="7" fill="#1b1e20"/>
+          <rect x="58" y="59.5" width="60" height="3" rx="1.2" fill="#24292c"/>
+          <rect x="162.5" y="38" width="5.5" height="15" rx="1" fill="#0d0f11"/>
+          <path d="M163 41H168M163 44H168M163 47H168" stroke="#2a2f33" stroke-width=".8"/>
+          <path d="M149 35.6H167.5" stroke="#f6fbff" stroke-width="2.4" stroke-linecap="round"/>
+          <rect x="158" y="55" width="10" height="4" rx="1" fill="#2a2f32"/>` },
+      { id: 'classic', vb: [0, 0, 164, 80], wheel: 'wSteel', ws: 27, wx: [39, 130], wy: 60, head: [150, 44], tail: [12.5, 47], speed: 0.97,
+        body: `<g stroke="#262c28" stroke-width="2"><path d="M18 12H100M22 12V17M60 12V17M96 12V17"/></g>
+          <rect x="28" y="6" width="22" height="6" rx="1" fill="#3c443d"/><rect x="54" y="7" width="14" height="5" rx="1" fill="#5a4426"/><rect x="72" y="8" width="18" height="4" rx="1" fill="#2a312c"/>
+          <rect x="4" y="27" width="9" height="24" rx="3.5" fill="#0b0f0d"/><path d="M6.2 29V49" stroke="#232c26" stroke-width="2.2" stroke-dasharray="2 1.6"/>
+          <path d="M12 60V21Q12 17 16 17H102Q104 17 105 19L111 36H149Q153 36 153 40V60Z" fill="url(#pgA)"/>
+          <path d="M13.5 17.8H102L109.8 35.4H150" stroke="#a9c9a6" stroke-width="1.1" fill="none" opacity=".55"/>
+          <path d="M18 22H44V35H18ZM48 22H74V35H48ZM79 22H100L106 35H79Z" fill="url(#gl)"/>
+          <path d="M50 23H58L52 34H48ZM20 23H26L21 34H18Z" fill="#fff" opacity=".08"/>
+          <path d="M12 38.5H153" stroke="#18271b" stroke-width="1"/><path d="M14 47H151" stroke="#fff" stroke-width=".6" opacity=".1"/>
+          <path d="M46.5 22V58M77 22V58" stroke="#18271b" stroke-width=".9"/>
+          <g fill="#b6c4b7" opacity=".55"><rect x="38" y="41" width="5" height="1.4"/><rect x="70" y="41" width="5" height="1.4"/></g>
+          <g stroke="#1c2b1f" stroke-width=".8"><path d="M116 41H146M116 44H146"/></g>
+          <rect x="11.5" y="44" width="2.4" height="6" fill="#b52219"/>
+          <path d="M22 60V50Q22 44 28 44H50Q56 44 56 50V60ZM113 60V50Q113 44 119 44H141Q147 44 147 50V60Z" fill="#101712"/>
+          <rect x="8" y="55" width="11" height="5" fill="#191c1a"/><rect x="139" y="55" width="18" height="7" rx="1" fill="#1d201e"/><rect x="153" y="52" width="4" height="10" fill="#151816"/>
+          <rect x="58" y="60" width="52" height="3" fill="#151916"/>
+          <path d="M113.5 52V40L107 21V9.5H114" stroke="#111613" stroke-width="3.3" fill="none" stroke-linejoin="round"/>
+          <circle cx="150" cy="44" r="3.5" fill="#fff6cf"/><circle cx="150" cy="44" r="2" fill="#ffffff"/>
+          <rect x="148" y="49.6" width="4" height="2" rx=".6" fill="#f59e0b"/>` },
+      { id: 'pickup', vb: [0, 0, 200, 80], wheel: 'wAlloy', ws: 30, wx: [44, 158], wy: 60, head: [188, 38], tail: [9, 40], speed: 1.03,
+        body: `<path d="M50 32L56 20H75L77 30" stroke="#1b1f22" stroke-width="2.8" fill="none" stroke-linejoin="round"/>
+          <rect x="18" y="26" width="26" height="7" rx="1.5" fill="#24292d"/><rect x="21" y="23" width="9" height="4" rx="1" fill="#6b3a1b"/>
+          <path d="M8 60V34Q8 32 10 32H77L80 15Q81 13 84 13H120Q123 13 125 15L143 32H182Q188 33 189 38V55Q189 60 184 60Z" fill="url(#pyA)"/>
+          <path d="M9 32.8H77M81 13.8H121L142 32.4H183" stroke="#eef2f4" stroke-width="1.1" fill="none" opacity=".55"/>
+          <path d="M84 17H101V30H82.5ZM105 17H121L135.5 30H105Z" fill="url(#gl)"/>
+          <path d="M108 18H116L110 29H106ZM86 18H92L88 29H84Z" fill="#fff" opacity=".09"/>
+          <rect x="101" y="16" width="4" height="15" fill="#14181a"/>
+          <g fill="#f59e0b"><rect x="104" y="11.3" width="3" height="1.7" rx=".6"/><rect x="109" y="11.3" width="3" height="1.7" rx=".6"/><rect x="114" y="11.3" width="3" height="1.7" rx=".6"/></g>
+          <path d="M10 35H77M78 36H189" stroke="#41474b" stroke-width="1"/><path d="M12 45H186" stroke="#fff" stroke-width=".7" opacity=".14"/>
+          <path d="M103 31V56M13 34V56" stroke="#41474b" stroke-width=".8"/>
+          <g fill="#2b3134"><rect x="93" y="40" width="6" height="1.6" rx=".8"/><rect x="127" y="40" width="6" height="1.6" rx=".8"/></g>
+          <path d="M136 29.5L142.5 27.4V32Z" fill="#121517"/>
+          <rect x="8" y="35" width="2.8" height="11" rx="1" fill="#d42c1f"/>
+          <path d="M22 60L25 47Q27 42 33 42H55Q61 42 63 47L66 60ZM136 60L139 47Q141 42 147 42H169Q175 42 177 47L180 60Z" fill="#131618"/>
+          <rect x="8" y="54" width="181" height="6" fill="#1c2023"/>
+          <rect x="66" y="59.5" width="70" height="3" rx="1.2" fill="#202427"/>
+          <rect x="182" y="38" width="7" height="16" rx="1" fill="#0c0e10"/>
+          <path d="M176 36.5L188.5 38" stroke="#f6fbff" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M183 41.5H188M183 44.5H188" stroke="#f59e0b" stroke-width="1.2"/>
+          <rect x="178" y="55" width="12" height="5" rx="1" fill="#16191b"/>` }
+    ];
+
+    const CAMP_ASSETS = {
+      wagon: { vb: [0, 30, 176, 72], body: `<ellipse cx="88" cy="96" rx="80" ry="3.5" fill="#000" opacity=".55"/>
+          <g fill="#262c28"><rect x="20" y="38.5" width="88" height="2.4" rx="1"/><rect x="24" y="40" width="2.4" height="3"/><rect x="62" y="40" width="2.4" height="3"/><rect x="102" y="40" width="2.4" height="3"/></g>
+          <rect x="30" y="33" width="30" height="5.5" rx="1.2" fill="#3a423b"/><rect x="66" y="34" width="16" height="4.5" rx="1" fill="#5a4426"/>
+          <rect x="4" y="51" width="8" height="22" rx="3.5" fill="#0b0f0d"/>
+          <path d="M10 85V48Q10 43 15 42H112Q115 42 116 44L124 60H160Q166 60 167 65V82Q167 85 163 85Z" fill="url(#pgB)"/>
+          <path d="M11.5 43H112Q114.4 43 115.3 44.8L123.4 60.6H161" stroke="#a9c9a6" stroke-width="1.1" fill="none" opacity=".5"/>
+          <path d="M16 46H44V58H16ZM48 46H76V58H48ZM80 46H111L117.5 58H80Z" fill="url(#gl)"/>
+          <path d="M18 47H44V58H18Z" fill="#ffb347" opacity=".18"/>
+          <path d="M82 47H90L85 57H80Z" fill="#fff" opacity=".08"/>
+          <path d="M12 62H166" stroke="#b6c9b6" stroke-width=".8" opacity=".45"/>
+          <path d="M46 46V82M78 46V82" stroke="#17251a" stroke-width=".9"/>
+          <path d="M24 85V76Q24 69 31 69H49Q56 69 56 76V85ZM120 85V76Q120 69 127 69H145Q152 69 152 76V85Z" fill="#101712"/>
+          <rect x="7" y="80" width="12" height="5" fill="#1b1e1c"/><rect x="152" y="80" width="18" height="6" rx="1" fill="#2b302d"/>
+          <circle cx="161.5" cy="67" r="3.1" fill="#fff6cf" opacity=".7"/>
+          <use href="#wSteel" x="26.5" y="71.5" width="27" height="27"/><use href="#wSteel" x="122.5" y="71.5" width="27" height="27"/>` },
+      cross: { vb: [0, 8, 160, 62], body: `<ellipse cx="80" cy="65" rx="72" ry="3.2" fill="#000" opacity=".55"/>
+          <path d="M8 52C7 44 10 40 18 38L36 33C50 20 70 15 90 15C108 15 122 22 134 31L146 35C152 37 154 42 153 48L152 52Z" fill="url(#pk)"/>
+          <path d="M42 33C54 22 70 19 88 19C103 19 115 24 126 32Z" fill="url(#gl)"/>
+          <path d="M60 23C70 20 80 19.5 88 19.6L80 31H54Z" fill="#a9c2d2" opacity=".1"/>
+          <path d="M36 33C50 20 70 15 90 15C108 15 122 22 134 31" stroke="#a5b1ba" stroke-width="1.1" fill="none" opacity=".6"/>
+          <path d="M85 20V33M85 34V49" stroke="#000" stroke-width=".8"/><path d="M18 38.5H146" stroke="#343a40" stroke-width=".8"/>
+          <path d="M20 44H150" stroke="#fff" stroke-width=".6" opacity=".1"/>
+          <g fill="#454d55"><rect x="62" y="37" width="7" height="1.4" rx=".7"/><rect x="100" y="37" width="7" height="1.4" rx=".7"/></g>
+          <path d="M22 52A16 16 0 0 1 54 52ZM106 52A16 16 0 0 1 138 52Z" fill="#050607"/>
+          <path d="M138 34L150 37.4" stroke="#eaf6ff" stroke-width="1.7" stroke-linecap="round"/>
+          <path d="M9.5 39.5L22 37" stroke="#ff3b2f" stroke-width="1.9" stroke-linecap="round"/>
+          <use href="#wAero" x="25" y="39" width="26" height="26"/><use href="#wAero" x="109" y="39" width="26" height="26"/>` },
+      tent: { vb: [0, 0, 92, 54], body: `<ellipse cx="46" cy="50" rx="44" ry="3" fill="#000" opacity=".5"/>
+          <path d="M14 30L1 50M78 30L91 50M30 16L20 6M62 16L72 6" stroke="#7d8a82" stroke-width=".6" opacity=".7"/>
+          <path d="M6 49Q10 15 46 8Q82 15 86 49Z" fill="url(#tf)"/>
+          <path d="M46 8Q31 26 22 49M46 8Q61 26 70 49M9 33Q46 22 83 33" stroke="#2a1205" stroke-width="1.1" fill="none" opacity=".8"/>
+          <path d="M46 8.6Q80 15.5 85.4 48" stroke="#f0a56e" stroke-width=".9" fill="none" opacity=".5"/>
+          <path d="M28 49Q33 27 46 21Q59 27 64 49Z" fill="#4a1f0b"/>
+          <path d="M35 49Q38 33 46 29Q54 33 57 49Z" fill="#ffbf5e"/>
+          <path d="M39 49Q41 37 46 34Q51 37 53 49Z" fill="#fff0c4" opacity=".7"/>` },
+      grill: { vb: [0, 0, 44, 48], body: `<ellipse cx="22" cy="46" rx="16" ry="2" fill="#000" opacity=".5"/>
+          <path d="M22 22L9 46M22 22L35 46M22 22V46" stroke="#55665e" stroke-width="1.8"/>
+          <path d="M8 21Q22 35 36 21Z" fill="#1d2622"/><path d="M8 21Q22 35 36 21" stroke="#7a8a82" stroke-width=".8" fill="none" opacity=".6"/>
+          <ellipse cx="22" cy="21" rx="14.5" ry="3.4" fill="#ff6b1a"/><ellipse cx="22" cy="21" rx="10" ry="2" fill="#ffc46b" opacity=".8"/>
+          <path d="M9 21H35M12 19.6H32M12 22.4H32" stroke="#2b2b2b" stroke-width=".7"/>` }
+    };
+
+    function wheelSvg(id) { return svgDoc([-16, -16, 32, 32], `<use href="#${id}" x="-16" y="-16" width="32" height="32"/>`, 8); }
+    function loadImg(svg) {
+      return new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null);
+        im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
+    }
+    const IMG = {};
+    const ready = Promise.all([
+      ...VEHICLES.map(v => loadImg(svgDoc(v.vb, v.body)).then(im => IMG[v.id] = im)),
+      ...Object.entries(CAMP_ASSETS).map(([k, a]) => loadImg(svgDoc(a.vb, a.body)).then(im => IMG[k] = im)),
+      ...['wSteel', 'wAlloy'].map(w => loadImg(wheelSvg(w)).then(im => IMG[w] = im))
+    ]);
+
+    /* ---------- scene state ---------- */
+    let W = 0, H = 0, DPR = 1, S = 1, U = 1, UC = 1;
+    let roadTop, hmap, HM_OFF = 600, bgCanvas, fgCanvas, mistCanvas, stars = [], camp = {}, rocksTrack = [];
+    const vehState = [];
+    const dust = [], sparks = [], smoke = [];
+    const nRoad = noise1(7), nMtn = noise1(21), nFire = noise1(99);
+
+    function makeCanvas(w, h) { const c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; }
+    function prerender(img, vb, scale) {
+      const c = makeCanvas(vb[2] * scale * DPR, vb[3] * scale * DPR);
+      if (img) c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      return c;
+    }
+
+    function roadSurfaceY(x) { // far edge of road (top of band)
+      const base = roadBase;
+      return base + S * (5.5 * Math.sin(x * 0.0058 + 1.3) + 3.2 * Math.sin(x * 0.0151 + 0.4) + 6 * (fbm(nRoad, x * 0.012, 3) - 0.5));
+    }
+    let roadBase = 0, roadDepth = 18;
+    const groundAt = x => { const i = Math.round(x) + HM_OFF; return hmap[clamp(i, 0, hmap.length - 1)]; };
+
+    function buildTerrain() {
+      const r = rng(1337);
+      roadDepth = 20 * S;
+      const n = W + HM_OFF * 2;
+      hmap = new Float32Array(n);
+      for (let i = 0; i < n; i++) { const x = i - HM_OFF; hmap[i] = roadSurfaceY(x) + roadDepth * 0.56; }
+      // rocks in the wheel track
+      rocksTrack = [];
+      for (let x = -HM_OFF; x < W + HM_OFF;) {
+        x += (70 + r() * 170) * S;
+        const w = (8 + r() * 16) * S, h = (2.2 + r() * 4.6) * S;
+        rocksTrack.push({ x, w, h, seed: Math.floor(r() * 1e6) });
+        for (let dx = -w / 2; dx <= w / 2; dx++) {
+          const i = Math.round(x + dx) + HM_OFF; if (i < 0 || i >= n) continue;
+          const t = dx / (w / 2); hmap[i] -= h * Math.sqrt(Math.max(0, 1 - t * t)) * 0.9;
+        }
+      }
+    }
+
+    function drawPine(c, x, yb, h, col, rr) {
+      const tiers = 5 + Math.floor(rr() * 3);
+      c.fillStyle = col; c.beginPath();
+      c.rect(x - h * 0.025, yb - h * 0.2, h * 0.05, h * 0.2);
+      for (let i = 0; i < tiers; i++) {
+        const f = i / tiers, top = yb - h * (0.3 + 0.7 * (i + 1) / tiers), bot = yb - h * 0.12 - h * 0.72 * f;
+        const w = h * 0.34 * (1 - f * 0.78) * (0.85 + rr() * 0.3);
+        c.moveTo(x, top); c.lineTo(x + w * 0.55, lerp(top, bot, 0.55)); c.lineTo(x + w * 0.42, lerp(top, bot, 0.58));
+        c.lineTo(x + w, bot); c.lineTo(x + w * 0.2, bot - h * 0.025); c.lineTo(x - w * 0.2, bot - h * 0.025);
+        c.lineTo(x - w, bot); c.lineTo(x - w * 0.42, lerp(top, bot, 0.58)); c.lineTo(x - w * 0.55, lerp(top, bot, 0.55)); c.closePath();
+      }
+      c.fill();
+    }
+
+    function drawRock(c, x, yb, w, h, seed, light = 1) {
+      const rr = rng(seed), pts = [], k = 7;
+      for (let i = 0; i <= k; i++) { const t = i / k, ang = Math.PI * (1 - t);
+        const rad = 0.78 + rr() * 0.32; pts.push([x + Math.cos(ang) * w / 2 * rad, yb - Math.sin(ang) * h * rad]); }
+      const g = c.createLinearGradient(x - w / 2, yb - h, x + w / 2, yb);
+      g.addColorStop(0, `rgba(${88 * light | 0},${88 * light | 0},${84 * light | 0},1)`); g.addColorStop(1, '#16150f');
+      c.fillStyle = 'rgba(0,0,0,.45)'; c.beginPath(); c.ellipse(x - w * 0.15, yb + 0.6 * S, w * 0.62, h * 0.28 + 0.8, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = g; c.beginPath(); c.moveTo(x - w / 2, yb); pts.forEach(p => c.lineTo(p[0], p[1])); c.lineTo(x + w / 2, yb); c.closePath(); c.fill();
+      c.strokeStyle = `rgba(215,220,212,${0.32 * light})`; c.lineWidth = Math.max(0.6, 0.8 * S); c.beginPath();
+      for (let i = Math.floor(k * 0.45); i <= k; i++) { const p = pts[i]; i === Math.floor(k * 0.45) ? c.moveTo(p[0], p[1]) : c.lineTo(p[0], p[1]); }
+      c.stroke();
+      c.strokeStyle = 'rgba(0,0,0,.35)'; c.lineWidth = 0.7 * S; c.beginPath(); c.moveTo(pts[2][0], pts[2][1] + h * 0.15); c.lineTo(x + w * 0.05, yb - h * 0.25); c.stroke();
+    }
+
+    function tuft(c, x, yb, h, col, rr, lean = 0) {
+      c.strokeStyle = col; c.lineCap = 'round';
+      const blades = 4 + Math.floor(rr() * 5);
+      for (let i = 0; i < blades; i++) {
+        const a = (rr() - 0.5) * 1.1 + lean, hh = h * (0.5 + rr() * 0.6);
+        c.lineWidth = Math.max(0.6, (0.6 + rr() * 0.9) * S);
+        c.beginPath(); c.moveTo(x + (rr() - 0.5) * 3 * S, yb);
+        c.quadraticCurveTo(x + Math.sin(a) * hh * 0.4, yb - hh * 0.6, x + Math.sin(a) * hh, yb - hh * Math.cos(a)); c.stroke();
+      }
+    }
+
+    function ridge(x, base, amp, freq, seed) { return base - amp * fbm(nMtn, x * freq + seed, 5); }
+
+    function buildBackground() {
+      bgCanvas = makeCanvas(W * DPR, H * DPR); fgCanvas = makeCanvas(W * DPR, H * DPR);
+      const c = bgCanvas.getContext('2d'); c.scale(DPR, DPR);
+      const r = rng(4242);
+      // sky
+      const sky = c.createLinearGradient(0, 0, 0, H);
+      sky.addColorStop(0, '#04080a'); sky.addColorStop(0.45, '#081311'); sky.addColorStop(0.72, '#0d1916'); sky.addColorStop(1, '#070b09');
+      c.fillStyle = sky; c.fillRect(0, 0, W, H);
+      let g = c.createRadialGradient(W * 0.5, H * 0.12, 0, W * 0.5, H * 0.12, Math.max(W, H) * 0.55);
+      g.addColorStop(0, 'rgba(255,107,26,0.07)'); g.addColorStop(1, 'rgba(255,107,26,0)'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+      // stars
+      stars = [];
+      for (let i = 0; i < Math.floor(W * H / 2600); i++) {
+        const x = r() * W, y = Math.pow(r(), 1.6) * H * 0.62, m = r();
+        const a = 0.15 + m * 0.6, rad = (m > 0.97 ? 1.3 : 0.55 + m * 0.5) * Math.max(0.8, S);
+        c.fillStyle = `rgba(${220 + r() * 35 | 0},${230 + r() * 25 | 0},255,${a})`; c.beginPath(); c.arc(x, y, rad, 0, 7); c.fill();
+        if (m > 0.93) stars.push({ x, y, rad: rad * 1.4, ph: r() * 6.28, sp: 0.6 + r() * 1.6 });
+      }
+      // milky band
+      c.save(); c.translate(W * 0.2, H * 0.05); c.rotate(0.32);
+      g = c.createLinearGradient(0, -H * 0.08, 0, H * 0.08); g.addColorStop(0, 'rgba(150,180,200,0)'); g.addColorStop(0.5, 'rgba(150,180,200,0.045)'); g.addColorStop(1, 'rgba(150,180,200,0)');
+      c.fillStyle = g; c.fillRect(-W * 0.2, -H * 0.08, W * 1.4, H * 0.16); c.restore();
+      // moon
+      const mx = W * 0.84, my = H * 0.17, mr = clamp(22 * S, 14, 30);
+      g = c.createRadialGradient(mx, my, mr * 0.6, mx, my, mr * 9); g.addColorStop(0, 'rgba(200,220,215,0.16)'); g.addColorStop(0.3, 'rgba(160,190,185,0.05)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = g; c.fillRect(0, 0, W, H);
+      g = c.createRadialGradient(mx - mr * 0.3, my - mr * 0.3, mr * 0.1, mx, my, mr);
+      g.addColorStop(0, '#f4f2e6'); g.addColorStop(0.7, '#d9d8c9'); g.addColorStop(1, '#b8b9ab'); c.fillStyle = g; c.beginPath(); c.arc(mx, my, mr, 0, 7); c.fill();
+      c.fillStyle = 'rgba(120,125,112,0.28)';
+      [[-.3, -.2, .22], [.25, .1, .16], [-.05, .35, .12], [.35, -.32, .09], [-.42, .22, .08]].forEach(([dx, dy, rr2]) => { c.beginPath(); c.arc(mx + dx * mr, my + dy * mr, rr2 * mr, 0, 7); c.fill(); });
+
+      // mountain layers (far -> near)
+      const layers = [
+        { base: H * 0.60, amp: H * 0.26, f: 0.0016, s: 3.1, top: '#24383b', bot: '#121e1d', rim: 'rgba(185,212,218,0.32)', trees: 0, snow: true },
+        { base: H * 0.67, amp: H * 0.21, f: 0.0024, s: 11.7, top: '#1a2a27', bot: '#0e1816', rim: 'rgba(160,195,190,0.22)', trees: 0 },
+        { base: H * 0.74, amp: H * 0.15, f: 0.0035, s: 27.2, top: '#111d19', bot: '#0b1411', rim: 'rgba(130,170,160,0.12)', trees: 0.45 },
+        { base: H * 0.80, amp: H * 0.09, f: 0.0052, s: 43.9, top: '#0d1713', bot: '#08100c', rim: null, trees: 0.75 }
+      ];
+      layers.forEach((L, li) => {
+        const pts = []; for (let x = -10; x <= W + 10; x += 4) pts.push([x, ridge(x, L.base, L.amp, L.f, L.s)]);
+        const minY = Math.min(...pts.map(p => p[1]));
+        g = c.createLinearGradient(0, minY, 0, H); g.addColorStop(0, L.top); g.addColorStop(1, L.bot);
+        c.fillStyle = g; c.beginPath(); c.moveTo(-10, H); pts.forEach(p => c.lineTo(p[0], p[1])); c.lineTo(W + 10, H); c.closePath(); c.fill();
+        if (L.snow) {
+          c.save(); c.beginPath(); c.moveTo(-10, H); pts.forEach(p => c.lineTo(p[0], p[1])); c.lineTo(W + 10, H); c.closePath(); c.clip();
+          const sl = minY + L.amp * 0.18; g = c.createLinearGradient(0, minY, 0, sl + 10);
+          g.addColorStop(0, 'rgba(205,220,225,0.22)'); g.addColorStop(1, 'rgba(205,220,225,0)'); c.fillStyle = g; c.fillRect(0, minY - 2, W, sl - minY + 12); c.restore();
+        }
+        if (L.rim) { c.strokeStyle = L.rim; c.lineWidth = 1; c.beginPath(); pts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.stroke(); }
+        if (L.trees) {
+          const rr = rng(77 + li); const col = li === 2 ? '#0c1612' : '#08110d';
+          for (let x = -10; x < W + 10;) { const y = ridge(x, L.base, L.amp, L.f, L.s);
+            if (rr() < L.trees) drawPine(c, x, y + 3, (7 + rr() * (li === 3 ? 22 : 13)) * Math.max(0.7, S), col, rr);
+            x += (3 + rr() * 7) * Math.max(0.7, S); }
+        }
+        // aerial haze at the foot of each layer
+        g = c.createLinearGradient(0, L.base - L.amp * 0.15, 0, L.base + H * 0.06);
+        g.addColorStop(0, 'rgba(28,46,42,0)'); g.addColorStop(1, `rgba(28,46,42,${0.32 - li * 0.06})`);
+        c.fillStyle = g; c.fillRect(0, L.base - L.amp * 0.15, W, H * 0.06 + L.amp * 0.15);
+      });
+
+      // meadow terrace behind the road
+      const terr = c.createLinearGradient(0, roadBase - 40 * S, 0, roadBase + 10);
+      terr.addColorStop(0, '#0a130e'); terr.addColorStop(1, '#0d1711');
+      c.fillStyle = terr; c.beginPath(); c.moveTo(0, H);
+      for (let x = 0; x <= W; x += 6) c.lineTo(x, roadBase - 18 * S - 6 * S * fbm(nRoad, x * 0.004 + 9, 3)); c.lineTo(W, H); c.closePath(); c.fill();
+      const rt = rng(55);
+      for (let x = 0; x < W; x += (4 + rt() * 9) * S) tuft(c, x, roadSurfaceY(x) - 1, (4 + rt() * 7) * S, `rgba(${40 + rt() * 30 | 0},${70 + rt() * 30 | 0},${48 + rt() * 20 | 0},0.7)`, rt);
+
+      // camp (behind the road, on the terrace)
+      layoutCamp();
+      const drawCampImg = (key, cx, scale) => {
+        const a = CAMP_ASSETS[key], im = IMG[key]; if (!im) return;
+        const w = a.vb[2] * scale, h = a.vb[3] * scale, yb = roadSurfaceY(cx) + 1;
+        c.drawImage(im, cx - w / 2, yb - h, w, h);
+      };
+      if (camp.pineL) camp.pineL.forEach(p => drawPine(c, p.x, roadSurfaceY(p.x) + 2, p.h, '#0a150f', rng(p.seed)));
+      drawCampImg('tent', camp.tent, UC * 1.05);
+      drawCampImg('wagon', camp.wagon, UC);
+      // fire pit stones and logs
+      const fx = camp.fire, fy = roadSurfaceY(fx);
+      c.fillStyle = '#1a1d19'; for (let i = 0; i < 9; i++) { const a = Math.PI * (i / 8); c.beginPath();
+        c.ellipse(fx + Math.cos(a) * 15 * UC * 1.6, fy - 1.5 * S + Math.sin(a) * -2 * S, 3.4 * S, 2.4 * S, 0, 0, 7); c.fill(); }
+      c.strokeStyle = '#2e2116'; c.lineWidth = 4 * S; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(fx - 13 * S, fy - 1); c.lineTo(fx + 13 * S, fy - 5 * S); c.stroke();
+      c.strokeStyle = '#3b2b1d'; c.beginPath(); c.moveTo(fx - 11 * S, fy - 5 * S); c.lineTo(fx + 12 * S, fy - 1); c.stroke();
+      if (camp.grill != null) drawCampImg('grill', camp.grill, UC * 0.95);
+      drawCampImg('cross', camp.cross, UC);
+      if (camp.pineR) camp.pineR.forEach(p => drawPine(c, p.x, roadSurfaceY(p.x) + 2, p.h, '#0a150f', rng(p.seed)));
+      // charging cable
+      const cxs = camp.cross - CAMP_ASSETS.cross.vb[2] * UC * 0.47, cy = roadSurfaceY(camp.cross) - 6 * S;
+      c.strokeStyle = 'rgba(34,197,94,0.55)'; c.setLineDash([3 * S, 3 * S]); c.lineWidth = 1.1 * S; c.beginPath(); c.moveTo(cxs, cy);
+      c.quadraticCurveTo(cxs - 20 * S, cy + 7 * S, cxs - 38 * S, cy + 4 * S); c.stroke(); c.setLineDash([]);
+
+      // the road band
+      const top = [], bot = [];
+      for (let x = -4; x <= W + 4; x += 3) { const y = roadSurfaceY(x); top.push([x, y]); bot.push([x, y + roadDepth]); }
+      g = c.createLinearGradient(0, roadBase - 8 * S, 0, roadBase + roadDepth + 8 * S);
+      g.addColorStop(0, '#3a3529'); g.addColorStop(0.45, '#2c281f'); g.addColorStop(1, '#17150f');
+      c.fillStyle = g; c.beginPath(); top.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]));
+      for (let i = bot.length - 1; i >= 0; i--) c.lineTo(bot[i][0], bot[i][1]); c.closePath(); c.fill();
+      // dirt tone variation
+      const rp = rng(2024);
+      c.save(); c.beginPath(); top.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]));
+      for (let i = bot.length - 1; i >= 0; i--) c.lineTo(bot[i][0], bot[i][1]); c.closePath(); c.clip();
+      for (let i = 0; i < W / 22; i++) { const x = rp() * W, y = roadSurfaceY(x) + roadDepth * rp(), rw = (20 + rp() * 70) * S, rh = (3 + rp() * 6) * S;
+        const pg = c.createRadialGradient(x, y, 0, x, y, rw); const dark = rp() < 0.55;
+        pg.addColorStop(0, dark ? 'rgba(12,10,7,0.35)' : 'rgba(92,82,62,0.22)'); pg.addColorStop(1, 'rgba(0,0,0,0)');
+        c.fillStyle = pg; c.beginPath(); c.ellipse(x, y, rw, rh, 0, 0, 7); c.fill(); }
+      c.restore();
+      // moonlit far edge
+      c.strokeStyle = 'rgba(205,200,175,0.16)'; c.lineWidth = 1; c.beginPath(); top.forEach((p, i) => i ? c.lineTo(p[0], p[1] + 0.5) : c.moveTo(p[0], p[1] + 0.5)); c.stroke();
+      // tyre ruts
+      [[0.40, 0.30, 2.4], [0.72, 0.38, 2.8]].forEach(([f, a, wdt]) => {
+        c.strokeStyle = `rgba(10,9,6,${a})`; c.lineWidth = wdt * S; c.beginPath();
+        for (let x = -4; x <= W + 4; x += 3) { const y = roadSurfaceY(x) + roadDepth * f + Math.sin(x * 0.05) * 0.4 * S; x < 0 ? c.moveTo(x, y) : c.lineTo(x, y); } c.stroke();
+        c.strokeStyle = 'rgba(190,180,150,0.07)'; c.lineWidth = 1; c.beginPath();
+        for (let x = -4; x <= W + 4; x += 3) { const y = roadSurfaceY(x) + roadDepth * f - wdt * S * 0.6; x < 0 ? c.moveTo(x, y) : c.lineTo(x, y); } c.stroke();
+      });
+      // gravel
+      const rg = rng(9001), count = Math.floor(W * roadDepth * 0.09);
+      for (let i = 0; i < count; i++) {
+        const x = rg() * W, y = roadSurfaceY(x) + rg() * roadDepth, sz = (0.4 + Math.pow(rg(), 3) * 1.6) * S, lt = rg();
+        c.fillStyle = lt > 0.62 ? `rgba(${110 + rg() * 50 | 0},${102 + rg() * 40 | 0},${84 + rg() * 30 | 0},${0.18 + rg() * 0.25})` : `rgba(8,7,5,${0.3 + rg() * 0.4})`;
+        c.beginPath(); c.ellipse(x, y, sz * 1.3, sz, 0, 0, 7); c.fill();
+      }
+      // rocks on the driving line
+      rocksTrack.forEach(rk => { if (rk.x > -40 && rk.x < W + 40) drawRock(c, rk.x, roadSurfaceY(rk.x) + roadDepth * 0.56 + rk.h * 0.12, rk.w, rk.h, rk.seed, 0.95); });
+      // small stones scattered on the far half
+      for (let i = 0; i < W / 40; i++) { const x = rg() * W; drawRock(c, x, roadSurfaceY(x) + roadDepth * (0.12 + rg() * 0.25), (3 + rg() * 6) * S, (1.4 + rg() * 2.6) * S, Math.floor(rg() * 1e6), 0.75); }
+
+      // ---- foreground (drawn over the vehicles) ----
+      const f = fgCanvas.getContext('2d'); f.scale(DPR, DPR);
+      // near verge
+      g = f.createLinearGradient(0, roadBase + roadDepth * 0.7, 0, H);
+      g.addColorStop(0, '#11100b'); g.addColorStop(0.25, '#0a0c09'); g.addColorStop(1, '#050706');
+      f.fillStyle = g; f.beginPath(); f.moveTo(-4, H);
+      for (let x = -4; x <= W + 4; x += 3) f.lineTo(x, roadSurfaceY(x) + roadDepth * 0.86 + S * (1.6 * Math.sin(x * 0.09) + 2 * fbm(nRoad, x * 0.05 + 40, 2)));
+      f.lineTo(W + 4, H); f.closePath(); f.fill();
+      // near-edge stones and grass
+      const rf = rng(31337);
+      for (let x = 0; x < W;) { const y = roadSurfaceY(x) + roadDepth * 0.9;
+        if (rf() < 0.35) drawRock(f, x, y + 2 * S, (5 + rf() * 13) * S, (2.5 + rf() * 6) * S, Math.floor(rf() * 1e6), 0.85);
+        if (rf() < 0.6) tuft(f, x + rf() * 6 * S, y + 3 * S, (6 + rf() * 12) * S, `rgba(${22 + rf() * 22 | 0},${44 + rf() * 26 | 0},${30 + rf() * 16 | 0},0.95)`, rf, (rf() - 0.5) * 0.4);
+        x += (9 + rf() * 22) * S; }
+      // vignette
+      g = f.createRadialGradient(W / 2, H * 0.45, Math.min(W, H) * 0.35, W / 2, H * 0.5, Math.max(W, H) * 0.8);
+      g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.45)'); f.fillStyle = g; f.fillRect(0, 0, W, H);
+
+      // mist texture
+      mistCanvas = makeCanvas(W * 1.6, 160 * S);
+      const m = mistCanvas.getContext('2d'), rm = rng(808);
+      for (let i = 0; i < 26; i++) { const x = rm() * mistCanvas.width, y = mistCanvas.height * (0.3 + rm() * 0.4), rad = (60 + rm() * 140) * S;
+        const mg = m.createRadialGradient(x, y, 0, x, y, rad); mg.addColorStop(0, 'rgba(60,85,78,0.16)'); mg.addColorStop(1, 'rgba(60,85,78,0)');
+        m.fillStyle = mg; m.fillRect(x - rad, y - rad, rad * 2, rad * 2); }
+    }
+
+    function layoutCamp() {
+      const narrow = W < 640;
+      camp = {
+        tent: W * (narrow ? 0.12 : 0.085), wagon: W * (narrow ? 0.33 : 0.19),
+        fire: W * (narrow ? 0.66 : 0.755), grill: narrow ? null : W * 0.815, cross: W * (narrow ? 0.86 : 0.895),
+        pineL: [{ x: W * 0.02, h: 95 * S, seed: 3 }, { x: W * 0.045, h: 70 * S, seed: 4 }],
+        pineR: [{ x: W * 0.975, h: 100 * S, seed: 5 }, { x: W * 0.955, h: 66 * S, seed: 6 }]
+      };
+    }
+
+    /* ---------- vehicles ---------- */
+    function initVehicles() {
+      vehState.length = 0;
+      let x = W * 0.42;
+      VEHICLES.forEach((v, i) => {
+        const L = (v.wx[1] - v.wx[0]) * U, len = v.vb[2] * U;
+        vehState.push({ v, x, y: null, vy: 0, a: 0, va: 0, spin: 0, speed: 0, L, len,
+          body: prerender(IMG[v.id], v.vb, U), wheel: IMG[v.wheel] ? prerender(IMG[v.wheel], [0, 0, v.ws, v.ws], U) : null,
+          tr: v.ws / 2 * 15.6 / 16 * U });
+        x -= len + 40 * S;
+      });
+    }
+    function contact(x, r) { let y = Infinity; for (let d = -r * 0.55; d <= r * 0.55; d += Math.max(1, r * 0.18)) y = Math.min(y, groundAt(x + d)); return y; }
+
+    function stepVehicles(dt) {
+      const base = 62 * Math.max(0.75, S);
+      const order = [...vehState].sort((p, q) => q.x - p.x);
+      order.forEach((s, idx) => {
+        const xr = s.x, xf = xr + s.L * Math.cos(s.a);
+        const g1 = contact(xr, s.tr), g2 = contact(xf, s.tr);
+        const slope = (g2 - g1) / s.L;
+        let target = base * s.v.speed * clamp(1 + 1.6 * slope, 0.55, 1.2);
+        const ahead = order[idx - 1];
+        if (ahead) { const gap = (ahead.x - (s.v.wx[0] * U)) - (s.x + (s.len - s.v.wx[0] * U)); const want = 34 * S;
+          if (gap < want * 2) target = Math.min(target, ahead.speed * clamp(gap / want, 0, 1.3)); }
+        s.speed = lerp(s.speed || target, target, clamp(dt * 1.8, 0, 1));
+        s.x += s.speed * dt;
+        if (s.x > W + 260 * S) { const minX = Math.min(...vehState.map(o => o.x)); s.x = Math.min(-s.len - 60 * S, minX - s.len - 90 * S); s.y = null; }
+        const w1 = g1 - s.tr, w2 = g2 - s.tr, ty = (w1 + w2) / 2, ta = Math.atan2(w2 - w1, s.L);
+        if (s.y === null) { s.y = ty; s.a = ta; s.vy = 0; s.va = 0; }
+        s.vy += (230 * (ty - s.y) - 15 * s.vy) * dt; s.y += s.vy * dt; s.y = clamp(s.y, ty - 3.2 * S, ty + 2.4 * S);
+        s.va += (210 * (ta - s.a) - 14 * s.va) * dt; s.a += s.va * dt;
+        s.w1 = w1; s.w2 = w2; s.xf = xf;
+        s.spin += s.speed * dt / s.tr;
+        // dust from rear tyres
+        if (!reduceMotion && Math.random() < dt * 26 * (s.speed / base)) {
+          dust.push({ x: xr - s.tr * 0.5, y: g1 - 1, vx: -(12 + Math.random() * 26) * S, vy: -(5 + Math.random() * 13) * S, life: 0, max: 0.9 + Math.random() * 0.9, r: (1.6 + Math.random() * 2.2) * S });
+        }
+        if (!reduceMotion && Math.random() < dt * 9) dust.push({ x: xf - s.tr * 0.5, y: g2 - 1, vx: -(8 + Math.random() * 14) * S, vy: -(3 + Math.random() * 8) * S, life: 0, max: 0.6 + Math.random() * 0.6, r: (1.2 + Math.random() * 1.6) * S });
+      });
+    }
+
+    function localToWorld(s, lx, ly) {
+      const mid = (s.v.wx[0] + s.v.wx[1]) / 2, ox = (lx - mid) * U, oy = (ly - s.v.wy) * U;
+      const cx = (s.x + s.xf) / 2, ca = Math.cos(s.a), sa = Math.sin(s.a);
+      return [cx + ox * ca - oy * sa, s.y + ox * sa + oy * ca];
+    }
+
+    function drawVehicles(c) {
+      vehState.forEach(s => {
+        if (s.x < -s.len - 40 || s.x > W + 300) return;
+        const cx = (s.x + s.xf) / 2;
+        // ground shadow
+        c.fillStyle = 'rgba(0,0,0,0.5)'; c.beginPath(); c.ellipse(cx, groundAt(cx) - 0.5, s.L * 0.82, 3.2 * S, s.a * 0.5, 0, 7); c.fill();
+        // headlight pool on the road
+        const [hx, hy] = localToWorld(s, s.v.head[0], s.v.head[1]);
+        c.save(); c.globalCompositeOperation = 'lighter';
+        const px = hx + 70 * S, py = groundAt(hx + 70 * S) - 1;
+        let g = c.createRadialGradient(px, py, 0, px, py, 75 * S); g.addColorStop(0, 'rgba(255,225,165,0.20)'); g.addColorStop(1, 'rgba(255,225,165,0)');
+        c.fillStyle = g; c.beginPath(); c.ellipse(px, py, 80 * S, 9 * S, s.a, 0, 7); c.fill();
+        c.restore();
+        // body
+        const mid = (s.v.wx[0] + s.v.wx[1]) / 2;
+        c.save(); c.translate(cx, s.y); c.rotate(s.a);
+        c.drawImage(s.body, -mid * U, -s.v.wy * U, s.v.vb[2] * U, s.v.vb[3] * U);
+        c.restore();
+        // wheels
+        if (s.wheel) [[s.x, s.w1], [s.xf, s.w2]].forEach(([wx, wy]) => {
+          const d = s.v.ws * U; c.save(); c.translate(wx, wy); c.rotate(s.spin); c.drawImage(s.wheel, -d / 2, -d / 2, d, d); c.restore(); });
+        // beams
+        c.save(); c.globalCompositeOperation = 'lighter';
+        const dir = s.a + 0.07, Lb = 175 * S, spread = 0.17;
+        g = c.createLinearGradient(hx, hy, hx + Math.cos(dir) * Lb, hy + Math.sin(dir) * Lb);
+        g.addColorStop(0, 'rgba(255,238,195,0.34)'); g.addColorStop(0.35, 'rgba(255,220,160,0.12)'); g.addColorStop(1, 'rgba(255,210,140,0)');
+        c.fillStyle = g; c.beginPath(); c.moveTo(hx, hy - 1.2 * S);
+        c.lineTo(hx + Math.cos(dir - spread) * Lb, hy + Math.sin(dir - spread) * Lb);
+        c.lineTo(hx + Math.cos(dir + spread) * Lb, hy + Math.sin(dir + spread) * Lb); c.lineTo(hx, hy + 1.2 * S); c.closePath(); c.fill();
+        g = c.createRadialGradient(hx, hy, 0, hx, hy, 9 * S); g.addColorStop(0, 'rgba(255,250,230,0.85)'); g.addColorStop(1, 'rgba(255,240,200,0)');
+        c.fillStyle = g; c.beginPath(); c.arc(hx, hy, 9 * S, 0, 7); c.fill();
+        const [tx, ty] = localToWorld(s, s.v.tail[0], s.v.tail[1]);
+        g = c.createRadialGradient(tx, ty, 0, tx, ty, 8 * S); g.addColorStop(0, 'rgba(255,60,40,0.65)'); g.addColorStop(1, 'rgba(255,40,20,0)');
+        c.fillStyle = g; c.beginPath(); c.arc(tx, ty, 8 * S, 0, 7); c.fill();
+        c.restore();
+      });
+    }
+
+    /* ---------- camp effects ---------- */
+    function drawFire(c, t, dt) {
+      const x = camp.fire, y = roadSurfaceY(x) - 2 * S, s = S * 1.05;
+      const fl = 0.75 + 0.25 * nFire(t * 6.3) + 0.12 * Math.sin(t * 17);
+      c.save(); c.globalCompositeOperation = 'lighter';
+      let g = c.createRadialGradient(x, y - 10 * s, 0, x, y - 10 * s, 190 * s);
+      g.addColorStop(0, `rgba(255,128,40,${0.30 * fl})`); g.addColorStop(0.35, `rgba(255,96,24,${0.10 * fl})`); g.addColorStop(1, 'rgba(255,80,20,0)');
+      c.fillStyle = g; c.fillRect(x - 200 * s, y - 200 * s, 400 * s, 260 * s);
+      g = c.createRadialGradient(x, y + 4 * s, 0, x, y + 4 * s, 70 * s); g.addColorStop(0, `rgba(255,150,60,${0.22 * fl})`); g.addColorStop(1, 'rgba(255,150,60,0)');
+      c.fillStyle = g; c.beginPath(); c.ellipse(x, y + 4 * s, 80 * s, 14 * s, 0, 0, 7); c.fill();
+      for (let k = 0; k < 6; k++) {
+        const ph = k * 1.7, h = (20 + 16 * nFire(t * 3.1 + ph * 3)) * s * (k === 2 || k === 3 ? 1.35 : 1), w = (5 + 4 * nFire(t * 2 + ph)) * s;
+        const dx = (k - 2.5) * 4.2 * s, sway = Math.sin(t * 5 + ph) * 4 * s + (nFire(t * 4 + ph) - 0.5) * 6 * s;
+        g = c.createLinearGradient(x, y, x, y - h);
+        g.addColorStop(0, 'rgba(255,240,190,0.95)'); g.addColorStop(0.35, 'rgba(255,170,50,0.85)'); g.addColorStop(0.75, 'rgba(255,80,20,0.55)'); g.addColorStop(1, 'rgba(200,30,10,0)');
+        c.fillStyle = g; c.beginPath(); c.moveTo(x + dx - w, y);
+        c.bezierCurveTo(x + dx - w, y - h * 0.45, x + dx + sway - w * 0.2, y - h * 0.7, x + dx + sway, y - h);
+        c.bezierCurveTo(x + dx + sway + w * 0.2, y - h * 0.7, x + dx + w, y - h * 0.45, x + dx + w, y); c.closePath(); c.fill();
+      }
+      g = c.createRadialGradient(x, y - 3 * s, 0, x, y - 3 * s, 10 * s); g.addColorStop(0, 'rgba(255,255,235,0.9)'); g.addColorStop(1, 'rgba(255,220,150,0)');
+      c.fillStyle = g; c.beginPath(); c.arc(x, y - 3 * s, 10 * s, 0, 7); c.fill();
+      // embers in the pit
+      c.fillStyle = `rgba(255,90,20,${0.6 * fl})`; c.beginPath(); c.ellipse(x, y + 1.5 * s, 14 * s, 3 * s, 0, 0, 7); c.fill();
+      c.restore();
+      if (!reduceMotion && Math.random() < dt * 14) sparks.push({ x: x + (Math.random() - 0.5) * 14 * s, y: y - 12 * s, vx: (Math.random() - 0.4) * 14 * S, vy: -(30 + Math.random() * 50) * S, life: 0, max: 1 + Math.random() * 1.6 });
+      // tent interior glow
+      const tx = camp.tent, ty = roadSurfaceY(tx) - 10 * UC;
+      c.save(); c.globalCompositeOperation = 'lighter';
+      g = c.createRadialGradient(tx, ty, 0, tx, ty, 55 * UC); g.addColorStop(0, `rgba(255,180,80,${0.16 + 0.05 * Math.sin(t * 1.3)})`); g.addColorStop(1, 'rgba(255,170,70,0)');
+      c.fillStyle = g; c.fillRect(tx - 60 * UC, ty - 60 * UC, 120 * UC, 80 * UC); c.restore();
+      if (camp.grill != null && !reduceMotion && Math.random() < dt * 5) {
+        const gx = camp.grill, gy = roadSurfaceY(gx) - 28 * UC;
+        smoke.push({ x: gx + (Math.random() - 0.5) * 6 * S, y: gy, vx: (6 + Math.random() * 8) * S, vy: -(10 + Math.random() * 8) * S, life: 0, max: 3 + Math.random() * 1.5, r: 3 * S });
+      }
+    }
+
+    function stepParticles(c, dt) {
+      for (let i = dust.length - 1; i >= 0; i--) { const p = dust[i]; p.life += dt; if (p.life > p.max) { dust.splice(i, 1); continue; }
+        p.x += p.vx * dt; p.y += p.vy * dt; p.vy *= 0.97; p.vx *= 0.985; p.r += 7 * S * dt;
+        const a = 0.24 * (1 - p.life / p.max); c.fillStyle = `rgba(150,138,112,${a})`; c.beginPath(); c.arc(p.x, p.y, p.r, 0, 7); c.fill(); }
+      c.save(); c.globalCompositeOperation = 'lighter';
+      for (let i = sparks.length - 1; i >= 0; i--) { const p = sparks[i]; p.life += dt; if (p.life > p.max) { sparks.splice(i, 1); continue; }
+        p.x += p.vx * dt + Math.sin(p.life * 7 + i) * 0.3; p.y += p.vy * dt; p.vy *= 0.985;
+        const a = 1 - p.life / p.max; c.fillStyle = `rgba(255,${150 + 80 * a | 0},60,${a})`; c.beginPath(); c.arc(p.x, p.y, 1.1 * S, 0, 7); c.fill(); }
+      c.restore();
+      for (let i = smoke.length - 1; i >= 0; i--) { const p = smoke[i]; p.life += dt; if (p.life > p.max) { smoke.splice(i, 1); continue; }
+        p.x += p.vx * dt; p.y += p.vy * dt; p.r += 4 * S * dt; const a = 0.055 * Math.sin(Math.PI * p.life / p.max);
+        c.fillStyle = `rgba(170,185,178,${a})`; c.beginPath(); c.arc(p.x, p.y, p.r, 0, 7); c.fill(); }
+    }
+
+    /* ---------- frame ---------- */
+    let last = 0, t0 = performance.now(), built = false;
+    function frame(now) {
+      const dt = Math.min(0.05, (now - (last || now)) / 1000); last = now; const t = (now - t0) / 1000;
+      if (!built) { requestAnimationFrame(frame); return; }
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.drawImage(bgCanvas, 0, 0, W, H);
+      // twinkle
+      stars.forEach(st => { const a = 0.35 + 0.35 * Math.sin(t * st.sp + st.ph); ctx.fillStyle = `rgba(235,245,255,${a})`; ctx.beginPath(); ctx.arc(st.x, st.y, st.rad, 0, 7); ctx.fill(); });
+      // drifting mist over the forest
+      const mo = (t * 6 * S) % (W * 0.6);
+      ctx.globalAlpha = 0.9; ctx.drawImage(mistCanvas, -mo, roadBase - 150 * S, mistCanvas.width, mistCanvas.height); ctx.globalAlpha = 1;
+      drawFire(ctx, t, dt);
+      if (!reduceMotion) stepVehicles(dt); else if (vehState[0] && vehState[0].y == null) stepVehicles(0.016);
+      drawVehicles(ctx);
+      stepParticles(ctx, dt);
+      ctx.drawImage(fgCanvas, 0, 0, W, H);
+      requestAnimationFrame(frame);
+    }
+
+    function build() {
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth; H = window.innerHeight;
+      cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+      S = clamp(Math.min(W / 1400, H / 760), 0.62, 1.4);
+      const bar = document.querySelector('.bottom-bar');
+      const barTop = bar ? Math.min(bar.getBoundingClientRect().top, H - 30) : H - 40;
+      const btn = document.querySelector('.route-link');
+      const avail = btn ? barTop - btn.getBoundingClientRect().bottom : 120;
+      U = clamp(Math.min(0.8 * S, (avail - 14) * 0.95 / 80), 0.4, 1.3); UC = U * 0.92;
+      roadBase = barTop - 20 * S - 9 * S;
+      buildTerrain();
+      buildBackground();
+      initVehicles();
+      dust.length = sparks.length = smoke.length = 0;
+      built = true;
+    }
+
+    let rt;
+    ready.then(() => { build(); requestAnimationFrame(frame); });
+    window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 150); });
+  })();
   </script>
 </body>
 </html>
