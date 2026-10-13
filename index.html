@@ -641,6 +641,33 @@
     }
 
     /* -------------------------------------------------------------
+       LOCATIONS LINK
+    ------------------------------------------------------------- */
+    .route-link {
+      margin-top: 1.4rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.7rem 1.2rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--trail-orange);
+      text-decoration: none;
+      border: 1px solid var(--surface-border-bright);
+      background: rgba(13, 22, 18, 0.75);
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+    .route-link:hover, .route-link:focus-visible {
+      background: var(--trail-orange);
+      color: var(--bg-deep);
+      box-shadow: 0 0 18px var(--trail-glow);
+      outline: none;
+    }
+    .route-link svg { width: 15px; height: 15px; flex: none; }
+
+    /* -------------------------------------------------------------
        BOTTOM BAR
     ------------------------------------------------------------- */
     .bottom-bar {
@@ -953,6 +980,11 @@
         <div class="status-msg" id="statusMessage">BASECAMP PREPARATION &amp; ROUTE STAGING</div>
       </div>
     </section>
+
+    <a class="route-link" href="platomata.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20l6-12 4 7 3-4 5 9H3z"/></svg>
+      <span>ΥΠΟΨΗΦΙΑ ΣΗΜΕΙΑ ΚΑΤΑΣΚΗΝΩΣΗΣ →</span>
+    </a>
 
   </main>
 
