@@ -1530,6 +1530,72 @@
       };
     }
 
+    /* ---------- mud that sticks to the vehicles ---------- */
+    function irregBlob(c, r, x, y, rx, ry, rot, col) {
+      c.save(); c.translate(x, y); c.rotate(rot); c.fillStyle = col; c.beginPath();
+      const n = 8; for (let i = 0; i <= n; i++) { const a = i / n * 6.283, q = 0.65 + r() * 0.55; const px = Math.cos(a) * rx * q, py = Math.sin(a) * ry * q; i ? c.lineTo(px, py) : c.moveTo(px, py); }
+      c.closePath(); c.fill(); c.restore();
+    }
+    function mudColor(r, wet = 1) {
+      return r() < 0.62 ? `rgba(${46 + r() * 16 | 0},${32 + r() * 11 | 0},${18 + r() * 7 | 0},${(0.78 + r() * 0.22) * wet})`
+                        : `rgba(${76 + r() * 26 | 0},${56 + r() * 18 | 0},${33 + r() * 12 | 0},${(0.62 + r() * 0.3) * wet})`;
+    }
+    function buildMudLayers(s) {
+      const v = s.v, k = U * DPR, r = rng(v.id.length * 7919 + v.vb[2]);
+      const layers = [0, 1, 2].map(() => makeCanvas(s.body.width, s.body.height));
+      const [c1, c2, c3] = layers.map(L => L.getContext('2d'));
+      const vbw = v.vb[2], wy = v.wy;
+      // layer 1: brown film and caked mud on rockers, bumpers, arches and behind each tyre
+      const film = c1.createLinearGradient(0, (wy + 3) * k, 0, (wy - 20) * k);
+      film.addColorStop(0, 'rgba(58,40,22,0.92)'); film.addColorStop(0.35, 'rgba(62,44,25,0.55)'); film.addColorStop(1, 'rgba(62,44,25,0)');
+      c1.fillStyle = film; c1.fillRect(0, 0, c1.canvas.width, c1.canvas.height);
+      for (let i = 0; i < 380; i++) { const x = r() * vbw, y = wy + 3 - Math.pow(r(), 0.38) * 14;
+        irregBlob(c1, r, x * k, y * k, (0.8 + r() * 3.2) * k, (0.5 + r() * 1.6) * k, (r() - 0.5) * 0.5, mudColor(r)); }
+      v.wx.forEach(wx => {
+        for (let i = 0; i < 120; i++) { const a = Math.PI + r() * 1.25, d = (6 + Math.pow(r(), 0.7) * 34);
+          const x = wx + Math.cos(a) * d - 4, y = wy - 2 + Math.sin(a) * d * 0.62;
+          irregBlob(c1, r, x * k, y * k, (0.6 + r() * 2.2) * k, (0.3 + r() * 0.9) * k, a + Math.PI, mudColor(r)); }
+        for (let i = 0; i < 40; i++) { const a = -Math.PI * (0.05 + r() * 0.9), rr = 13 + r() * 4;   // caked arch lip
+          irregBlob(c1, r, (wx + Math.cos(a) * rr) * k, (wy + Math.sin(a) * rr) * k, (1 + r() * 2) * k, (0.6 + r() * 1) * k, a, mudColor(r)); }
+      });
+      // drips running down the lower panels
+      c1.lineCap = 'round';
+      for (let i = 0; i < 46; i++) { const x = r() * vbw, y = wy - 14 + r() * 8; c1.strokeStyle = mudColor(r); c1.lineWidth = (0.35 + r() * 0.5) * k;
+        c1.beginPath(); c1.moveTo(x * k, y * k); c1.lineTo((x + (r() - 0.5) * 0.4) * k, (y + 2 + r() * 6) * k); c1.stroke();
+        c1.fillStyle = c1.strokeStyle; c1.beginPath(); c1.arc((x) * k, (y + 2.5 + r() * 5) * k, (0.4 + r() * 0.4) * k, 0, 7); c1.fill(); }
+      // layer 2: doors and belt line, denser behind the wheels, flung streaks
+      for (let i = 0; i < 90; i++) { const x = r() * vbw, y = wy - 12 - Math.pow(r(), 1.6) * 16;
+        irregBlob(c2, r, x * k, y * k, (0.3 + r() * 1.1) * k, (0.2 + r() * 0.6) * k, (r() - 0.5) * 0.8, mudColor(r, 0.85)); }
+      const film2 = c2.createLinearGradient(0, (wy - 10) * k, 0, (wy - 28) * k);
+      film2.addColorStop(0, 'rgba(70,50,28,0.35)'); film2.addColorStop(1, 'rgba(70,50,28,0)');
+      c2.fillStyle = film2; c2.fillRect(0, 0, c2.canvas.width, c2.canvas.height);
+      v.wx.forEach(wx => { for (let j = 0; j < 9; j++) { const a = Math.PI + 0.25 + r() * 0.7, len = 18 + r() * 26;
+        for (let q = 0; q < 14; q++) { const d = 8 + q / 14 * len; irregBlob(c2, r, (wx + Math.cos(a) * d) * k, (wy + Math.sin(a) * d * 0.7) * k, (1.6 - q * 0.08) * k, (0.45) * k, a, mudColor(r, 1 - q / 18)); } } });
+      // layer 3: high splatter, smears on the glass, roof edge
+      for (let i = 0; i < 40; i++) { const x = r() * vbw, y = 16 + r() * 18;
+        irregBlob(c3, r, x * k, y * k, (0.2 + r() * 0.6) * k, (0.15 + r() * 0.4) * k, r() * 3, mudColor(r, 0.8)); }
+      c3.lineCap = 'round';
+      for (let i = 0; i < 4; i++) { const x = 15 + r() * (vbw - 40), y = 24 + r() * 7; c3.strokeStyle = `rgba(70,52,30,${0.14 + r() * 0.12})`; c3.lineWidth = (2 + r() * 3) * k;
+        c3.beginPath(); c3.moveTo(x * k, y * k); c3.quadraticCurveTo((x + 6) * k, (y - 3 + r() * 6) * k, (x + 10 + r() * 10) * k, (y + r() * 4 - 2) * k); c3.stroke(); }
+      // fresh, glossy highlights on the heaviest layer
+      for (let i = 0; i < 55; i++) { const x = r() * vbw, y = wy - Math.pow(r(), 0.5) * 12;
+        c1.fillStyle = `rgba(190,170,135,${0.14 + r() * 0.16})`; c1.beginPath(); c1.ellipse(x * k, y * k, (0.3 + r() * 0.5) * k, 0.22 * k, 0, 0, 7); c1.fill(); }
+      layers.forEach((L, i) => { const c = [c1, c2, c3][i]; c.globalCompositeOperation = 'destination-in'; c.drawImage(s.body, 0, 0); });
+      return layers;
+    }
+    function buildWheelMud(s) {
+      if (!s.wheel) return null;
+      const c = makeCanvas(s.wheel.width, s.wheel.height), x = c.getContext('2d'), R = s.wheel.width / 2, r = rng(s.v.ws * 131);
+      x.translate(R, R);
+      for (let i = 0; i < 70; i++) { const a = r() * 6.283, d = R * (0.66 + r() * 0.32);
+        irregBlob(x, r, Math.cos(a) * d, Math.sin(a) * d, R * (0.07 + r() * 0.12), R * (0.05 + r() * 0.07), a + Math.PI / 2, mudColor(r)); }
+      for (let i = 0; i < 26; i++) { const a = r() * 6.283, d = R * (0.15 + r() * 0.45);
+        irregBlob(x, r, Math.cos(a) * d, Math.sin(a) * d, R * (0.05 + r() * 0.09), R * (0.04 + r() * 0.06), a, mudColor(r, 0.9)); }
+      x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'destination-in'; x.drawImage(s.wheel, 0, 0);
+      return c;
+    }
+    const sat = v => smooth(clamp(v, 0, 1));
+
     /* ---------- vehicles ---------- */
     function initVehicles() {
       vehState.length = 0;
@@ -1538,7 +1604,8 @@
         const L = (v.wx[1] - v.wx[0]) * U, len = v.vb[2] * U;
         vehState.push({ v, x, y: null, vy: 0, a: 0, va: 0, spin: 0, speed: 0, L, len,
           body: prerender(IMG[v.id], v.vb, U), wheel: IMG[v.wheel] ? prerender(IMG[v.wheel], [0, 0, v.ws, v.ws], U) : null,
-          tr: v.ws / 2 * 15.6 / 16 * U });
+          tr: v.ws / 2 * 15.6 / 16 * U, dirt: 0, wet: 0 });
+        const st = vehState[vehState.length - 1]; st.mud = buildMudLayers(st); st.wheelMud = buildWheelMud(st);
         x -= len + 40 * S;
       });
     }
@@ -1558,13 +1625,18 @@
           if (gap < want * 2) target = Math.min(target, ahead.speed * clamp(gap / want, 0, 1.3)); }
         s.speed = lerp(s.speed || target, target, clamp(dt * 1.8, 0, 1));
         s.x += s.speed * dt;
-        if (s.x > W + 260 * S) { const minX = Math.min(...vehState.map(o => o.x)); s.x = Math.min(-s.len - 60 * S, minX - s.len - 90 * S); s.y = null; }
+        if (s.x > W + 260 * S) { const minX = Math.min(...vehState.map(o => o.x)); s.x = Math.min(-s.len - 60 * S, minX - s.len - 90 * S); s.y = null; s.dirt = 0; s.wet = 0; }
         const w1 = g1 - s.tr, w2 = g2 - s.tr, ty = (w1 + w2) / 2, ta = Math.atan2(w2 - w1, s.L);
         if (s.y === null) { s.y = ty; s.a = ta; s.vy = 0; s.va = 0; }
         s.vy += (230 * (ty - s.y) - 15 * s.vy) * dt; s.y += s.vy * dt; s.y = clamp(s.y, ty - 3.2 * S, ty + 2.4 * S);
         s.va += (210 * (ta - s.a) - 14 * s.va) * dt; s.a += s.va * dt;
         s.w1 = w1; s.w2 = w2; s.xf = xf;
         s.spin += s.speed * dt / s.tr * (1 + 0.9 * mud + 0.4 * mud * Math.sin(performance.now() / 90));
+        if (mud > 0.05) { s.dirt = Math.min(1, s.dirt + dt * 0.2 * mud); s.wet = 1; }
+        else { s.dirt = Math.max(0, s.dirt - dt * 0.004); s.wet = Math.max(0, s.wet - dt * 0.16); }
+        if (!reduceMotion && mud < 0.05 && s.wet > 0 && s.dirt > 0.25 && Math.random() < dt * 10 * s.wet * s.dirt) {
+          const fx = lerp(s.x - s.tr, s.xf + s.tr, Math.random());
+          mudBits.push({ x: fx, y: s.y + (Math.random() * 3 - 1) * S, vx: -s.speed * 0.15 + (Math.random() - 0.5) * 6 * S, vy: 4 * S, life: 0, max: 1.2, r: (0.6 + Math.random() * 1.1) * S }); }
         if (mud > 0.1 && !reduceMotion) { s.vy += (Math.random() - 0.5) * 900 * S * mud * dt; s.va += (Math.random() - 0.5) * 6 * mud * dt;
           const emit = (wx, gy, n) => { for (let k = 0; k < n; k++) mudBits.push({ x: wx - s.tr * (0.7 + Math.random() * 0.4), y: gy - s.tr * (0.1 + Math.random() * 0.35),
             vx: -(55 + Math.random() * 95) * S, vy: -(20 + Math.random() * 55) * S, life: 0, max: 0.9 + Math.random() * 0.5, r: (0.7 + Math.random() * 1.5) * S }); };
@@ -1601,15 +1673,23 @@
         const mid = (s.v.wx[0] + s.v.wx[1]) / 2;
         c.save(); c.translate(cx, s.y); c.rotate(s.a);
         c.drawImage(s.body, -mid * U, -s.v.wy * U, s.v.vb[2] * U, s.v.vb[3] * U);
+        if (s.dirt > 0.002 && s.mud) {
+          [sat(s.dirt / 0.35), sat((s.dirt - 0.22) / 0.4), sat((s.dirt - 0.55) / 0.45)].forEach((a, i) => {
+            if (a <= 0) return; c.globalAlpha = a; c.drawImage(s.mud[i], -mid * U, -s.v.wy * U, s.v.vb[2] * U, s.v.vb[3] * U); });
+          c.globalAlpha = 1;
+        }
         c.restore();
         // wheels
         if (s.wheel) [[s.x, s.w1], [s.xf, s.w2]].forEach(([wx, wy]) => {
-          const d = s.v.ws * U; c.save(); c.translate(wx, wy); c.rotate(s.spin); c.drawImage(s.wheel, -d / 2, -d / 2, d, d); c.restore(); });
+          const d = s.v.ws * U; c.save(); c.translate(wx, wy); c.rotate(s.spin); c.drawImage(s.wheel, -d / 2, -d / 2, d, d);
+          if (s.wheelMud && s.dirt > 0.002) { c.globalAlpha = sat(s.dirt / 0.22); c.drawImage(s.wheelMud, -d / 2, -d / 2, d, d); c.globalAlpha = 1; }
+          c.restore(); });
         // beams
         c.save(); c.globalCompositeOperation = 'lighter';
         const dir = s.a + 0.07, Lb = 175 * S, spread = 0.17;
         g = c.createLinearGradient(hx, hy, hx + Math.cos(dir) * Lb, hy + Math.sin(dir) * Lb);
-        g.addColorStop(0, 'rgba(255,238,195,0.34)'); g.addColorStop(0.35, 'rgba(255,220,160,0.12)'); g.addColorStop(1, 'rgba(255,210,140,0)');
+        const lit = 1 - 0.4 * sat((s.dirt - 0.4) / 0.6);
+        g.addColorStop(0, `rgba(255,238,195,${0.34 * lit})`); g.addColorStop(0.35, `rgba(255,220,160,${0.12 * lit})`); g.addColorStop(1, 'rgba(255,210,140,0)');
         c.fillStyle = g; c.beginPath(); c.moveTo(hx, hy - 1.2 * S);
         c.lineTo(hx + Math.cos(dir - spread) * Lb, hy + Math.sin(dir - spread) * Lb);
         c.lineTo(hx + Math.cos(dir + spread) * Lb, hy + Math.sin(dir + spread) * Lb); c.lineTo(hx, hy + 1.2 * S); c.closePath(); c.fill();
