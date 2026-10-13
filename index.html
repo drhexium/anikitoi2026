@@ -1235,7 +1235,7 @@
     let W = 0, H = 0, DPR = 1, S = 1, U = 1, UC = 1;
     let roadTop, hmap, HM_OFF = 600, bgCanvas, fgCanvas, mistCanvas, stars = [], camp = {}, rocksTrack = [];
     const vehState = [];
-    const dust = [], sparks = [], smoke = [];
+    const dust = [], sparks = [], smoke = [], mudBits = [];
     const nRoad = noise1(7), nMtn = noise1(21), nFire = noise1(99);
 
     function makeCanvas(w, h) { const c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; }
@@ -1249,7 +1249,13 @@
       const base = roadBase;
       return base + S * (5.5 * Math.sin(x * 0.0058 + 1.3) + 3.2 * Math.sin(x * 0.0151 + 0.4) + 6 * (fbm(nRoad, x * 0.012, 3) - 0.5));
     }
-    let roadBase = 0, roadDepth = 18;
+    let roadBase = 0, roadDepth = 18, MUD = { x0: 0, x1: 0 };
+    const smooth = e => e * e * (3 - 2 * e);
+    function mudAt(x) { // 0..1 wetness with soft edges
+      const edge = (MUD.x1 - MUD.x0) * 0.18;
+      if (x < MUD.x0 || x > MUD.x1) return 0;
+      return smooth(clamp(Math.min(x - MUD.x0, MUD.x1 - x) / edge, 0, 1));
+    }
     const groundAt = x => { const i = Math.round(x) + HM_OFF; return hmap[clamp(i, 0, hmap.length - 1)]; };
 
     function buildTerrain() {
@@ -1257,12 +1263,15 @@
       roadDepth = 20 * S;
       const n = W + HM_OFF * 2;
       hmap = new Float32Array(n);
-      for (let i = 0; i < n; i++) { const x = i - HM_OFF; hmap[i] = roadSurfaceY(x) + roadDepth * 0.56; }
+      const mw = W < 640 ? W * 0.28 : clamp(W * 0.17, 200 * S, 360 * S);
+      MUD.x0 = W * (W < 640 ? 0.40 : 0.43); MUD.x1 = MUD.x0 + mw;
+      for (let i = 0; i < n; i++) { const x = i - HM_OFF; hmap[i] = roadSurfaceY(x) + roadDepth * 0.56 + mudAt(x) * 2.2 * S; }
       // rocks in the wheel track
       rocksTrack = [];
       for (let x = -HM_OFF; x < W + HM_OFF;) {
         x += (70 + r() * 170) * S;
         const w = (8 + r() * 16) * S, h = (2.2 + r() * 4.6) * S;
+        if (mudAt(x - w) > 0 || mudAt(x + w) > 0 || mudAt(x) > 0) continue;
         rocksTrack.push({ x, w, h, seed: Math.floor(r() * 1e6) });
         for (let dx = -w / 2; dx <= w / 2; dx++) {
           const i = Math.round(x + dx) + HM_OFF; if (i < 0 || i >= n) continue;
@@ -1443,6 +1452,34 @@
       // small stones scattered on the far half
       for (let i = 0; i < W / 40; i++) { const x = rg() * W; drawRock(c, x, roadSurfaceY(x) + roadDepth * (0.12 + rg() * 0.25), (3 + rg() * 6) * S, (1.4 + rg() * 2.6) * S, Math.floor(rg() * 1e6), 0.75); }
 
+      // mud patch
+      {
+        const rm2 = rng(6061), x0 = MUD.x0 - 6, x1 = MUD.x1 + 6;
+        c.save();
+        c.beginPath();
+        for (let x = x0; x <= x1; x += 2) { const y = roadSurfaceY(x) + roadDepth * (0.22 - 0.12 * mudAt(x)) + Math.sin(x * 0.21) * 0.6 * S; x === x0 ? c.moveTo(x, y) : c.lineTo(x, y); }
+        for (let x = x1; x >= x0; x -= 2) c.lineTo(x, roadSurfaceY(x) + roadDepth * (0.9 + 0.05 * mudAt(x)));
+        c.closePath(); c.clip();
+        const mg = c.createLinearGradient(MUD.x0, 0, MUD.x1, 0);
+        mg.addColorStop(0, 'rgba(52,36,20,0)'); mg.addColorStop(0.12, 'rgba(52,36,20,0.97)'); mg.addColorStop(0.88, 'rgba(52,36,20,0.97)'); mg.addColorStop(1, 'rgba(52,36,20,0)');
+        c.fillStyle = mg; c.fillRect(x0, roadBase - 30 * S, x1 - x0, roadDepth + 60 * S);
+        // wet sheen and darker churned ruts
+        for (let i = 0; i < 26; i++) { const x = lerp(MUD.x0, MUD.x1, rm2()), y = roadSurfaceY(x) + roadDepth * (0.3 + rm2() * 0.55), rw = (10 + rm2() * 26) * S;
+          const pg = c.createRadialGradient(x, y, 0, x, y, rw); pg.addColorStop(0, `rgba(12,8,4,${0.5 * mudAt(x)})`); pg.addColorStop(1, 'rgba(12,8,4,0)');
+          c.fillStyle = pg; c.beginPath(); c.ellipse(x, y, rw, rw * 0.22, 0, 0, 7); c.fill(); }
+        // puddles reflecting the night sky and moon
+        for (let i = 0; i < 6; i++) { const x = lerp(MUD.x0 + (MUD.x1 - MUD.x0) * 0.15, MUD.x1 - (MUD.x1 - MUD.x0) * 0.15, (i + 0.3 + rm2() * 0.4) / 6);
+          const y = roadSurfaceY(x) + roadDepth * (0.4 + rm2() * 0.42), rw = (12 + rm2() * 22) * S, rh = (1.8 + rm2() * 2.4) * S;
+          const pg = c.createLinearGradient(0, y - rh, 0, y + rh); pg.addColorStop(0, 'rgba(105,135,145,0.75)'); pg.addColorStop(0.6, 'rgba(40,58,66,0.85)'); pg.addColorStop(1, 'rgba(20,28,32,0.9)');
+          c.fillStyle = pg; c.beginPath(); c.ellipse(x, y, rw, rh, 0, 0, 7); c.fill();
+          c.strokeStyle = 'rgba(15,10,6,0.8)'; c.lineWidth = 0.8 * S; c.stroke();
+          c.fillStyle = 'rgba(235,242,238,0.5)'; c.beginPath(); c.ellipse(x + rw * 0.3, y - rh * 0.25, rw * 0.28, Math.max(0.5, rh * 0.22), 0, 0, 7); c.fill(); }
+        // glossy mud flecks
+        for (let i = 0; i < (MUD.x1 - MUD.x0) * 0.5; i++) { const x = lerp(MUD.x0, MUD.x1, rm2()), y = roadSurfaceY(x) + roadDepth * (0.25 + rm2() * 0.65);
+          c.fillStyle = rm2() < 0.5 ? `rgba(120,100,75,${0.22 * mudAt(x)})` : `rgba(8,5,2,${0.5 * mudAt(x)})`; c.beginPath(); c.ellipse(x, y, (0.6 + rm2() * 1.4) * S, 0.5 * S, 0, 0, 7); c.fill(); }
+        c.restore();
+      }
+
       // ---- foreground (drawn over the vehicles) ----
       const f = fgCanvas.getContext('2d'); f.scale(DPR, DPR);
       // near verge
@@ -1451,10 +1488,24 @@
       f.fillStyle = g; f.beginPath(); f.moveTo(-4, H);
       for (let x = -4; x <= W + 4; x += 3) f.lineTo(x, roadSurfaceY(x) + roadDepth * 0.86 + S * (1.6 * Math.sin(x * 0.09) + 2 * fbm(nRoad, x * 0.05 + 40, 2)));
       f.lineTo(W + 4, H); f.closePath(); f.fill();
+      // mud lip that swallows the tyre bottoms
+      {
+        const x0 = MUD.x0, x1 = MUD.x1;
+        f.beginPath();
+        for (let x = x0; x <= x1; x += 2) { const m = mudAt(x); f.lineTo(x, groundAt(x) - 2.2 * S * m + Math.sin(x * 0.33) * 0.5 * S * m); }
+        for (let x = x1; x >= x0; x -= 2) f.lineTo(x, roadSurfaceY(x) + roadDepth * 0.95);
+        f.closePath();
+        const lg = f.createLinearGradient(x0, 0, x1, 0);
+        lg.addColorStop(0, 'rgba(44,30,17,0)'); lg.addColorStop(0.15, 'rgba(44,30,17,0.98)'); lg.addColorStop(0.85, 'rgba(44,30,17,0.98)'); lg.addColorStop(1, 'rgba(44,30,17,0)');
+        f.fillStyle = lg; f.fill();
+        f.strokeStyle = 'rgba(175,155,120,0.38)'; f.lineWidth = 0.9 * S; f.beginPath();
+        for (let x = x0 + (x1 - x0) * 0.12; x <= x1 - (x1 - x0) * 0.12; x += 2) f.lineTo(x, groundAt(x) - 2.2 * S * mudAt(x) + Math.sin(x * 0.33) * 0.5 * S);
+        f.stroke();
+      }
       // near-edge stones and grass
       const rf = rng(31337);
       for (let x = 0; x < W;) { const y = roadSurfaceY(x) + roadDepth * 0.9;
-        if (rf() < 0.35) drawRock(f, x, y + 2 * S, (5 + rf() * 13) * S, (2.5 + rf() * 6) * S, Math.floor(rf() * 1e6), 0.85);
+        if (rf() < 0.35 && mudAt(x) < 0.05) drawRock(f, x, y + 2 * S, (5 + rf() * 13) * S, (2.5 + rf() * 6) * S, Math.floor(rf() * 1e6), 0.85);
         if (rf() < 0.6) tuft(f, x + rf() * 6 * S, y + 3 * S, (6 + rf() * 12) * S, `rgba(${22 + rf() * 22 | 0},${44 + rf() * 26 | 0},${30 + rf() * 16 | 0},0.95)`, rf, (rf() - 0.5) * 0.4);
         x += (9 + rf() * 22) * S; }
       // vignette
@@ -1500,7 +1551,8 @@
         const xr = s.x, xf = xr + s.L * Math.cos(s.a);
         const g1 = contact(xr, s.tr), g2 = contact(xf, s.tr);
         const slope = (g2 - g1) / s.L;
-        let target = base * s.v.speed * clamp(1 + 1.6 * slope, 0.55, 1.2);
+        const mud = Math.max(mudAt(xr), mudAt(xf));
+        let target = base * s.v.speed * clamp(1 + 1.6 * slope, 0.55, 1.2) * (1 - 0.5 * mud);
         const ahead = order[idx - 1];
         if (ahead) { const gap = (ahead.x - (s.v.wx[0] * U)) - (s.x + (s.len - s.v.wx[0] * U)); const want = 34 * S;
           if (gap < want * 2) target = Math.min(target, ahead.speed * clamp(gap / want, 0, 1.3)); }
@@ -1512,12 +1564,17 @@
         s.vy += (230 * (ty - s.y) - 15 * s.vy) * dt; s.y += s.vy * dt; s.y = clamp(s.y, ty - 3.2 * S, ty + 2.4 * S);
         s.va += (210 * (ta - s.a) - 14 * s.va) * dt; s.a += s.va * dt;
         s.w1 = w1; s.w2 = w2; s.xf = xf;
-        s.spin += s.speed * dt / s.tr;
+        s.spin += s.speed * dt / s.tr * (1 + 0.9 * mud + 0.4 * mud * Math.sin(performance.now() / 90));
+        if (mud > 0.1 && !reduceMotion) { s.vy += (Math.random() - 0.5) * 900 * S * mud * dt; s.va += (Math.random() - 0.5) * 6 * mud * dt;
+          const emit = (wx, gy, n) => { for (let k = 0; k < n; k++) mudBits.push({ x: wx - s.tr * (0.7 + Math.random() * 0.4), y: gy - s.tr * (0.1 + Math.random() * 0.35),
+            vx: -(55 + Math.random() * 95) * S, vy: -(20 + Math.random() * 55) * S, life: 0, max: 0.9 + Math.random() * 0.5, r: (0.7 + Math.random() * 1.5) * S }); };
+          if (Math.random() < dt * 60 * mud) emit(xr, g1, 2);
+          if (Math.random() < dt * 35 * mud) emit(xf, g2, 1); }
         // dust from rear tyres
-        if (!reduceMotion && Math.random() < dt * 26 * (s.speed / base)) {
+        if (!reduceMotion && mud < 0.2 && Math.random() < dt * 26 * (s.speed / base)) {
           dust.push({ x: xr - s.tr * 0.5, y: g1 - 1, vx: -(12 + Math.random() * 26) * S, vy: -(5 + Math.random() * 13) * S, life: 0, max: 0.9 + Math.random() * 0.9, r: (1.6 + Math.random() * 2.2) * S });
         }
-        if (!reduceMotion && Math.random() < dt * 9) dust.push({ x: xf - s.tr * 0.5, y: g2 - 1, vx: -(8 + Math.random() * 14) * S, vy: -(3 + Math.random() * 8) * S, life: 0, max: 0.6 + Math.random() * 0.6, r: (1.2 + Math.random() * 1.6) * S });
+        if (!reduceMotion && mud < 0.2 && Math.random() < dt * 9) dust.push({ x: xf - s.tr * 0.5, y: g2 - 1, vx: -(8 + Math.random() * 14) * S, vy: -(3 + Math.random() * 8) * S, life: 0, max: 0.6 + Math.random() * 0.6, r: (1.2 + Math.random() * 1.6) * S });
       });
     }
 
@@ -1605,6 +1662,11 @@
       for (let i = dust.length - 1; i >= 0; i--) { const p = dust[i]; p.life += dt; if (p.life > p.max) { dust.splice(i, 1); continue; }
         p.x += p.vx * dt; p.y += p.vy * dt; p.vy *= 0.97; p.vx *= 0.985; p.r += 7 * S * dt;
         const a = 0.24 * (1 - p.life / p.max); c.fillStyle = `rgba(150,138,112,${a})`; c.beginPath(); c.arc(p.x, p.y, p.r, 0, 7); c.fill(); }
+      for (let i = mudBits.length - 1; i >= 0; i--) { const p = mudBits[i]; p.life += dt;
+        p.vy += 260 * S * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.99;
+        if (p.life > p.max || (p.vy > 0 && p.y > groundAt(p.x) + 1)) { mudBits.splice(i, 1); continue; }
+        c.fillStyle = 'rgba(58,40,22,0.95)'; c.beginPath(); c.ellipse(p.x, p.y, p.r * 1.25, p.r, Math.atan2(p.vy, p.vx), 0, 7); c.fill();
+        c.fillStyle = 'rgba(160,140,110,0.25)'; c.beginPath(); c.arc(p.x - p.r * 0.3, p.y - p.r * 0.3, p.r * 0.35, 0, 7); c.fill(); }
       c.save(); c.globalCompositeOperation = 'lighter';
       for (let i = sparks.length - 1; i >= 0; i--) { const p = sparks[i]; p.life += dt; if (p.life > p.max) { sparks.splice(i, 1); continue; }
         p.x += p.vx * dt + Math.sin(p.life * 7 + i) * 0.3; p.y += p.vy * dt; p.vy *= 0.985;
@@ -1649,7 +1711,7 @@
       buildTerrain();
       buildBackground();
       initVehicles();
-      dust.length = sparks.length = smoke.length = 0;
+      dust.length = sparks.length = smoke.length = mudBits.length = 0;
       built = true;
     }
 
