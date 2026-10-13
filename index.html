@@ -804,7 +804,7 @@
 
     <!-- Title: Ανίκητοι 2026 -->
     <h1 class="main-title">Ανίκητοι 2026</h1>
-    <div class="main-subtitle" id="subtitleDate">11 ΝΟΕΜΒΡΙΟΥ • 10:00 AM</div>
+    <div class="main-subtitle" id="subtitleDate">11 ΝΟΕΜΒΡΙΟΥ • 8:00 AM</div>
 
     <!-- Central Countdown Clock -->
     <section class="clock-container" aria-label="Αντίστροφη Μέτρηση">
@@ -835,7 +835,7 @@
       <div class="clock-footer">
         <div class="target-callout">
           <span class="blink-dot"></span>
-          <span id="targetCalloutText">DEPARTURE: 11 NOVEMBER // 10:00:00 EET</span>
+          <span id="targetCalloutText">DEPARTURE: 11 NOVEMBER // 08:00:00 EET</span>
         </div>
         <div class="status-msg" id="statusMessage">BASECAMP PREPARATION &amp; ROUTE STAGING</div>
       </div>
@@ -858,7 +858,7 @@
   <script>
     /**
      * DYNAMIC TARGET CALCULATION
-     * Targets November 11 at 10:00:00 AM.
+     * Targets November 11 at 08:00:00 AM.
      * Automatically targets the next upcoming November 11 if already past.
      */
     function getNextTargetDate() {
@@ -866,10 +866,10 @@
       const currentYear = now.getFullYear();
       
       // Note: JavaScript month index 10 = November
-      let target = new Date(currentYear, 10, 11, 10, 0, 0, 0);
+      let target = new Date(currentYear, 10, 11, 8, 0, 0, 0);
 
       if (now.getTime() >= target.getTime()) {
-        target = new Date(currentYear + 1, 10, 11, 10, 0, 0, 0);
+        target = new Date(currentYear + 1, 10, 11, 8, 0, 0, 0);
       }
       return target;
     }
@@ -887,8 +887,8 @@
     const telemetryStatus = document.getElementById('telemetryStatus');
     const statusMessage = document.getElementById('statusMessage');
     // Display formatted target date
-    subtitleDate.textContent = `11 ΝΟΕΜΒΡΙΟΥ ${targetYear} • 10:00 AM`;
-    targetCalloutText.textContent = `DEPARTURE: 11 NOVEMBER ${targetYear} // 10:00:00 EET`;
+    subtitleDate.textContent = `11 ΝΟΕΜΒΡΙΟΥ ${targetYear} • 8:00 AM`;
+    targetCalloutText.textContent = `DEPARTURE: 11 NOVEMBER ${targetYear} // 08:00:00 EET`;
 
     function pad(n) {
       return n < 10 ? '0' + n : String(n);
