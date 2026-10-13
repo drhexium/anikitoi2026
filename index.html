@@ -443,10 +443,10 @@
     /* Off-road Traverse Animation across Mountain Trail Shelf */
     .offroad-trail-shelf {
       position: absolute;
-      bottom: 21vh;
+      bottom: 58px;
       left: 0;
       width: 100%;
-      height: 60px;
+      height: 78px;
       overflow: hidden;
       pointer-events: none;
       z-index: 2;
@@ -457,12 +457,12 @@
       bottom: 4px;
       display: flex;
       align-items: flex-end;
-      gap: 50px;
-      animation: traverseRidge 38s linear infinite;
+      gap: 46px;
+      animation: traverseRidge 44s linear infinite;
     }
 
     @keyframes traverseRidge {
-      0% { transform: translateX(-380px); }
+      0% { transform: translateX(-560px); }
       100% { transform: translateX(calc(100vw + 380px)); }
     }
 
@@ -482,17 +482,34 @@
       100% { transform: translateY(1px) rotate(-0.5deg); }
     }
 
+    .traversing-rig.alt2 {
+      animation-duration: 0.36s;
+      animation-delay: 0.08s;
+    }
+
     .traversing-rig svg {
-      height: 32px;
-      fill: #263830;
+      height: 46px;
+      width: auto;
+      display: block;
       filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7));
+    }
+
+    .spin {
+      transform-origin: 0 0;
+      animation: wheelRoll 0.55s linear infinite;
+    }
+    @keyframes wheelRoll {
+      to { transform: rotate(360deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .spin { animation: none; }
     }
 
     /* Headlight volumetric light cone */
     .headlight-cone {
       position: absolute;
-      top: 10px;
-      left: 88%;
+      top: 16px;
+      left: 94%;
       width: 130px;
       height: 36px;
       background: linear-gradient(90deg, rgba(255, 230, 150, 0.42) 0%, rgba(255, 190, 70, 0.12) 60%, transparent 100%);
@@ -734,16 +751,66 @@
         transform-origin: bottom center;
       }
       .offroad-trail-shelf {
-        bottom: 13vh;
-        height: 45px;
+        bottom: 58px;
+        height: 52px;
       }
       .traversing-rig svg {
-        height: 24px;
+        height: 30px;
       }
     }
   </style>
 </head>
 <body>
+
+  <!-- Shared vehicle defs: wheels and paint gradients -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="paintGreenA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#55745a"/><stop offset=".45" stop-color="#34503a"/><stop offset="1" stop-color="#1c2d20"/></linearGradient>
+      <linearGradient id="paintGreenB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f6d55"/><stop offset=".5" stop-color="#304a36"/><stop offset="1" stop-color="#1a291e"/></linearGradient>
+      <linearGradient id="paintGreyA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a7afb4"/><stop offset=".45" stop-color="#7a8287"/><stop offset="1" stop-color="#43494d"/></linearGradient>
+      <linearGradient id="paintGreyB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b3babe"/><stop offset=".5" stop-color="#858d91"/><stop offset="1" stop-color="#4b5155"/></linearGradient>
+      <linearGradient id="paintBlack" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a525a"/><stop offset=".35" stop-color="#1e2226"/><stop offset="1" stop-color="#0a0b0d"/></linearGradient>
+      <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2c3a40"/><stop offset=".55" stop-color="#0d1316"/><stop offset="1" stop-color="#080b0d"/></linearGradient>
+      <symbol id="wSteel" viewBox="-16 -16 32 32">
+        <circle r="15.6" fill="#0a0e0c"/>
+        <circle r="14" fill="none" stroke="#222b26" stroke-width="2.6" stroke-dasharray="2.2 1.9"/>
+        <circle r="8.8" fill="#2b3530"/><circle r="8.8" fill="none" stroke="#4a5852" stroke-width="1"/>
+        <g fill="#111714"><circle cy="-5" r="1.5"/><circle cx="4.76" cy="-1.55" r="1.5"/><circle cx="2.94" cy="4.05" r="1.5"/><circle cx="-2.94" cy="4.05" r="1.5"/><circle cx="-4.76" cy="-1.55" r="1.5"/></g>
+        <circle r="2.3" fill="#56645d"/>
+      </symbol>
+      <symbol id="wSteelR" viewBox="-16 -16 32 32">
+        <g class="spin">
+        <circle r="15.6" fill="#0a0e0c"/>
+        <circle r="14" fill="none" stroke="#222b26" stroke-width="2.6" stroke-dasharray="2.2 1.9"/>
+        <circle r="8.8" fill="#2b3530"/><circle r="8.8" fill="none" stroke="#4a5852" stroke-width="1"/>
+        <g fill="#111714"><circle cy="-5" r="1.5"/><circle cx="4.76" cy="-1.55" r="1.5"/><circle cx="2.94" cy="4.05" r="1.5"/><circle cx="-2.94" cy="4.05" r="1.5"/><circle cx="-4.76" cy="-1.55" r="1.5"/></g>
+        <circle r="2.3" fill="#56645d"/>
+        </g>
+      </symbol>
+      <symbol id="wAlloy" viewBox="-16 -16 32 32">
+        <circle r="15.6" fill="#090b0c"/>
+        <circle r="14.1" fill="none" stroke="#20262a" stroke-width="2.4" stroke-dasharray="2.6 1.7"/>
+        <circle r="9.6" fill="#15191c"/><circle r="9.6" fill="none" stroke="#8e989f" stroke-width="1.3"/>
+        <path d="M0-8.8V-3M0 8.8V3M7.6-4.4L2.6-1.5M-7.6 4.4L-2.6 1.5M7.6 4.4L2.6 1.5M-7.6-4.4L-2.6-1.5" stroke="#9aa4ab" stroke-width="2.6" stroke-linecap="round"/>
+        <circle r="2.6" fill="#77828a"/>
+      </symbol>
+      <symbol id="wAlloyR" viewBox="-16 -16 32 32">
+        <g class="spin">
+        <circle r="15.6" fill="#090b0c"/>
+        <circle r="14.1" fill="none" stroke="#20262a" stroke-width="2.4" stroke-dasharray="2.6 1.7"/>
+        <circle r="9.6" fill="#15191c"/><circle r="9.6" fill="none" stroke="#8e989f" stroke-width="1.3"/>
+        <path d="M0-8.8V-3M0 8.8V3M7.6-4.4L2.6-1.5M-7.6 4.4L-2.6 1.5M7.6 4.4L2.6 1.5M-7.6-4.4L-2.6-1.5" stroke="#9aa4ab" stroke-width="2.6" stroke-linecap="round"/>
+        <circle r="2.6" fill="#77828a"/>
+        </g>
+      </symbol>
+      <symbol id="wAero" viewBox="-16 -16 32 32">
+        <circle r="15.6" fill="#08090a"/>
+        <circle r="11.2" fill="#1d2125"/><circle r="11.2" fill="none" stroke="#565e65" stroke-width="1"/>
+        <path d="M0-10.5Q3-6 1.2-1.6M10-3.2Q5.2-.6 1.7.6M6.2 8.5Q3 4.4 1 1.4M-6.2 8.5Q-4.6 3.8-1 1.4M-10-3.2Q-5.6-3.8-1.7.6" stroke="#3b4248" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <circle r="2.4" fill="#3a4046"/>
+      </symbol>
+    </defs>
+  </svg>
 
   <!-- Background Ambience & Animated Landscape -->
   <div class="bg-layers">
@@ -767,53 +834,94 @@
     <!-- Moving Off-Road Traverse Ridge Trail -->
     <div class="offroad-trail-shelf">
       <div class="trail-vehicle-convoy">
-        <!-- Rig 1: Ford Raptor with High-Stance, Chase Lights, & Headlight Cone -->
-        <div class="traversing-rig">
+        <!-- Rig 1: grey modern full-size SUV -->
+        <div class="traversing-rig alt2">
           <div class="headlight-cone"></div>
           <div class="dust-puff"></div>
-          <svg viewBox="0 0 110 45" width="85" height="35">
-            <!-- Chase Rack & LED Bar -->
-            <rect x="42" y="8" width="2" height="12" fill="#ff6b1a" />
-            <rect x="40" y="6" width="18" height="3" rx="1" fill="#facc15" />
-            <!-- Raptor Body -->
-            <path d="M5 32 L5 20 L38 20 L48 10 L75 10 L84 19 L104 20 L105 32 H94 A8 8 0 0 0 78 32 H44 A8 8 0 0 0 28 32 Z" fill="#2d3d34"/>
-            <!-- Windows -->
-            <path d="M50 12 H64 V19 H44 Z" fill="#0c1410"/>
-            <path d="M67 12 H74 L81 19 H67 Z" fill="#0c1410"/>
-            <!-- Wheels with Mud Tires -->
-            <circle cx="36" cy="32" r="7.5" fill="#080e0b" stroke="#374d41" stroke-width="2"/>
-            <circle cx="86" cy="32" r="7.5" fill="#080e0b" stroke="#374d41" stroke-width="2"/>
-            <!-- Amber Grille / Headlight -->
-            <circle cx="103" cy="22" r="2" fill="#ff6b1a" />
+          <svg viewBox="0 0 176 80" width="116" height="53" class="rolling" aria-hidden="true">
+            <ellipse cx="88" cy="74" rx="78" ry="3.5" fill="#000" opacity=".55"/>
+            <g fill="#1f2326"><rect x="22" y="10.5" width="82" height="2.6" rx="1.3"/><rect x="26" y="12" width="2.4" height="4"/><rect x="98" y="12" width="2.4" height="4"/></g>
+            <path d="M10 60V22Q10 16 17 15H111Q114 15 116 17L130 33H163Q168 33 168 38V56Q168 60 164 60Z" fill="url(#paintGreyB)"/>
+            <path d="M14 15.8H111Q113.5 15.8 115 17.6L129.4 33.2H163" stroke="#e1e6e9" stroke-width="1" fill="none" opacity=".55"/>
+            <path d="M16 19H38V31H16ZM42 19H72V31H42ZM76 19H110L121 31H76Z" fill="url(#glass)"/>
+            <path d="M80 20H90L84 30H78Z" fill="#fff" opacity=".08"/>
+            <path d="M10 37H168" stroke="#3d4346" stroke-width="1"/>
+            <path d="M40 19V58M74 19V58" stroke="#3d4346" stroke-width=".8"/>
+            <g fill="#2a2f32"><rect x="64" y="40" width="6" height="1.6" rx=".8"/><rect x="100" y="40" width="6" height="1.6" rx=".8"/></g>
+            <path d="M122 30L127 28.5V32Z" fill="#14171a"/>
+            <rect x="10" y="23" width="2.4" height="12" fill="#c8281c"/>
+            <path d="M22 60V49Q22 43 28 43H52Q58 43 58 49V60ZM118 60V49Q118 43 124 43H148Q154 43 154 49V60Z" fill="#16191b"/>
+            <rect x="10" y="53" width="158" height="7" fill="#1b1e20" opacity=".9"/>
+            <rect x="58" y="60" width="60" height="3" rx="1.2" fill="#202427"/>
+            <rect x="163" y="38" width="5" height="15" fill="#0e1012"/>
+            <path d="M149 35.6H167.5" stroke="#f1f8ff" stroke-width="2.2" stroke-linecap="round"/>
+            <use href="#wAlloyR" x="26" y="46" width="28" height="28"/>
+            <use href="#wAlloyR" x="122" y="46" width="28" height="28"/>
           </svg>
         </div>
 
-        <!-- Rig 2: Classic Land Rover Defender with Snorkel & Roof Rack -->
+        <!-- Rig 2: dark green classic boxy 4x4 with snorkel and roof rack -->
         <div class="traversing-rig alt">
           <div class="headlight-cone"></div>
           <div class="dust-puff delay"></div>
-          <svg viewBox="0 0 110 45" width="82" height="35">
-            <!-- Roof Rack -->
-            <rect x="22" y="5" width="55" height="3" rx="1" fill="#71867c"/>
-            <!-- Snorkel -->
-            <path d="M72 7 H75 V25 H78" stroke="#ff6b1a" stroke-width="2" fill="none"/>
-            <!-- Defender Body -->
-            <path d="M8 32 L8 16 L22 9 L75 9 L78 18 L98 20 L98 32 H88 A8 8 0 0 0 72 32 H38 A8 8 0 0 0 22 32 Z" fill="#22322a"/>
-            <!-- Spare Wheel on back -->
-            <rect x="3" y="15" width="5" height="15" rx="2" fill="#141f1a"/>
-            <!-- Wheels -->
-            <circle cx="30" cy="32" r="7.5" fill="#080e0b" stroke="#374d41" stroke-width="2"/>
-            <circle cx="80" cy="32" r="7.5" fill="#080e0b" stroke="#374d41" stroke-width="2"/>
-            <!-- Headlight -->
-            <circle cx="96" cy="22" r="2.5" fill="#fef08a"/>
+          <svg viewBox="0 0 164 80" width="108" height="53" class="rolling" aria-hidden="true">
+            <ellipse cx="84" cy="74" rx="74" ry="3.5" fill="#000" opacity=".55"/>
+            <g stroke="#262c28" stroke-width="2"><path d="M18 12H100M22 12V17M60 12V17M96 12V17"/></g>
+            <rect x="30" y="6.5" width="22" height="5.5" rx="1" fill="#39413a"/><rect x="56" y="7.5" width="14" height="4.5" rx="1" fill="#4b3a22"/>
+            <rect x="4" y="27" width="9" height="24" rx="3.5" fill="#0b0f0d"/><path d="M6 29V49" stroke="#1d2620" stroke-width="2" stroke-dasharray="2 1.6"/>
+            <path d="M12 60V21Q12 17 16 17H102Q104 17 105 19L111 36H149Q153 36 153 40V60Z" fill="url(#paintGreenA)"/>
+            <path d="M13.5 17.8H102L109.8 35.4H150" stroke="#9cbc9a" stroke-width="1" fill="none" opacity=".5"/>
+            <path d="M18 22H44V35H18ZM48 22H74V35H48ZM79 22H100L106 35H79Z" fill="url(#glass)"/>
+            <path d="M50 23H58L52 34H48Z" fill="#fff" opacity=".07"/>
+            <path d="M12 38.5H153" stroke="#1a2a1d" stroke-width="1"/>
+            <path d="M46.5 22V58M77 22V58" stroke="#1a2a1d" stroke-width=".9"/>
+            <g fill="#a9b6aa" opacity=".55"><rect x="38" y="41" width="5" height="1.4"/><rect x="70" y="41" width="5" height="1.4"/></g>
+            <g stroke="#1e2d21" stroke-width=".8"><path d="M116 41H146M116 44H146"/></g>
+            <path d="M22 60V50Q22 44 28 44H50Q56 44 56 50V60ZM113 60V50Q113 44 119 44H141Q147 44 147 50V60Z" fill="#111813"/>
+            <rect x="8" y="55" width="11" height="5" fill="#191c1a"/><rect x="139" y="55" width="18" height="7" rx="1" fill="#191c1a"/>
+            <rect x="58" y="60" width="52" height="3" fill="#151916"/>
+            <path d="M113.5 52V40L107 21V9.5H114" stroke="#121714" stroke-width="3.2" fill="none" stroke-linejoin="round"/>
+            <circle cx="149.5" cy="44" r="5.5" fill="#fff4c2" opacity=".18"/><circle cx="149.5" cy="44" r="3.4" fill="#fff4c2"/>
+            <rect x="147.5" y="49.5" width="4" height="2" rx=".6" fill="#f59e0b"/>
+            <use href="#wSteelR" x="25.5" y="46.5" width="27" height="27"/>
+            <use href="#wSteelR" x="116.5" y="46.5" width="27" height="27"/>
+          </svg>
+        </div>
+
+        <!-- Rig 3: grey modern pickup with sport bar and roof marker lights -->
+        <div class="traversing-rig">
+          <div class="headlight-cone"></div>
+          <div class="dust-puff"></div>
+          <svg viewBox="0 0 200 80" width="128" height="51" class="rolling" aria-hidden="true">
+            <ellipse cx="100" cy="74" rx="92" ry="3.5" fill="#000" opacity=".55"/>
+            <path d="M50 32L56 20H75L77 30" stroke="#1b1f22" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+            <path d="M8 60V34Q8 32 10 32H77L80 15Q81 13 84 13H120Q123 13 125 15L143 32H182Q188 33 189 38V55Q189 60 184 60Z" fill="url(#paintGreyA)"/>
+            <path d="M9 32.8H77M81 13.8H121L142 32.4H183" stroke="#dde3e6" stroke-width="1" fill="none" opacity=".5"/>
+            <path d="M84 17H101V30H82.5ZM105 17H121L135.5 30H105Z" fill="url(#glass)"/>
+            <path d="M108 18H116L110 29H106Z" fill="#fff" opacity=".08"/>
+            <rect x="101" y="16" width="4" height="15" fill="#14181a"/>
+            <g fill="#f59e0b"><rect x="104" y="11.4" width="3" height="1.6" rx=".6"/><rect x="109" y="11.4" width="3" height="1.6" rx=".6"/><rect x="114" y="11.4" width="3" height="1.6" rx=".6"/></g>
+            <path d="M10 35H77M78 36H189" stroke="#41474b" stroke-width="1"/>
+            <path d="M103 31V56M13 34V56" stroke="#41474b" stroke-width=".8"/>
+            <g fill="#2b3134"><rect x="93" y="40" width="6" height="1.6" rx=".8"/><rect x="127" y="40" width="6" height="1.6" rx=".8"/></g>
+            <path d="M136 29.5L142 27.5V32Z" fill="#121517"/>
+            <rect x="8" y="35" width="2.6" height="11" fill="#d42c1f"/>
+            <path d="M22 60L25 47Q27 42 33 42H55Q61 42 63 47L66 60ZM136 60L139 47Q141 42 147 42H169Q175 42 177 47L180 60Z" fill="#141719"/>
+            <rect x="8" y="54" width="181" height="6" fill="#1c2023" opacity=".9"/>
+            <rect x="66" y="60" width="70" height="3" rx="1.2" fill="#1d2124"/>
+            <rect x="182" y="38" width="7" height="16" rx="1" fill="#0d0f11"/>
+            <path d="M176 36.5L188.5 38" stroke="#f1f8ff" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M183 41.5H188M183 44.5H188" stroke="#f59e0b" stroke-width="1.2"/>
+            <use href="#wAlloyR" x="29" y="45" width="30" height="30"/>
+            <use href="#wAlloyR" x="143" y="45" width="30" height="30"/>
           </svg>
         </div>
       </div>
     </div>
 
-    <!-- Foreground Basecamp Scene (Pines, Tents, Campfire, BBQ Grill, Land Cruiser & Tesla) -->
+    <!-- Foreground Basecamp Scene (Pines, Tents, Campfire, BBQ Grill, Wagon & Crossover) -->
     <div class="basecamp-scenery">
-      <!-- Left Basecamp: Swaying Pines, Toyota Land Cruiser with Rooftop Tent, & Ground Tent -->
+      <!-- Left Basecamp: Swaying Pines, Wagon with Rooftop Tent, & Ground Tent -->
       <div class="camp-cluster">
         <!-- Swaying Pine Group 1 -->
         <svg viewBox="0 0 80 140" width="58" height="110" class="pine-sway-1">
@@ -834,27 +942,32 @@
           </svg>
         </div>
 
-        <!-- Toyota Land Cruiser with Overland Rooftop Tent & Awning -->
-        <div style="position: relative; width: 110px; height: 75px;">
-          <svg viewBox="0 0 120 75" width="110" height="75">
-            <!-- Rooftop Fold-out Tent -->
-            <polygon points="25,28 65,2 105,28" fill="#1a2b22" stroke="#f59e0b" stroke-width="1.2"/>
-            <polygon points="45,28 65,10 85,28" class="tent-lantern-glow" fill="rgba(245, 158, 11, 0.45)"/>
-            <!-- Ladder -->
-            <line x1="90" y1="28" x2="105" y2="62" stroke="#5f756b" stroke-width="1.5"/>
-            <line x1="92" y1="36" x2="96" y2="36" stroke="#5f756b" stroke-width="1"/>
-            <line x1="95" y1="45" x2="99" y2="45" stroke="#5f756b" stroke-width="1"/>
-            <line x1="98" y1="54" x2="102" y2="54" stroke="#5f756b" stroke-width="1"/>
-            <!-- Land Cruiser Body -->
-            <path d="M10 62 L10 38 L30 30 L85 30 L95 38 L114 40 L115 62 H104 A9 9 0 0 0 86 62 H44 A9 9 0 0 0 26 62 Z" fill="#1e2c25"/>
-            <!-- Wheels -->
-            <circle cx="35" cy="62" r="8.5" fill="#090e0b" stroke="#33463c" stroke-width="2"/>
-            <circle cx="95" cy="62" r="8.5" fill="#090e0b" stroke="#33463c" stroke-width="2"/>
+        <!-- Dark green classic wagon with overland rooftop tent -->
+        <div style="position: relative; width: 140px; height: 83px;">
+          <svg viewBox="0 0 176 104" width="140" height="83" aria-hidden="true">
+            <ellipse cx="88" cy="98" rx="80" ry="3.5" fill="#000" opacity=".55"/>
+            <path d="M24 37L10 86M29 37L15 86" stroke="#5f756b" stroke-width="1.4"/>
+            <path d="M23 45H28M20 55H25M17 65H22M14 75H19" stroke="#5f756b" stroke-width="1.1"/>
+            <rect x="20" y="37" width="88" height="5" rx="1.5" fill="#1d2a22"/>
+            <polygon points="22,37 64,7 106,37" fill="#2a3c31" stroke="#f59e0b" stroke-width="1.2"/>
+            <polygon points="46,37 64,16 82,37" class="tent-lantern-glow" fill="rgba(245, 158, 11, 0.5)"/>
+            <rect x="4" y="51" width="8" height="22" rx="3.5" fill="#0b0f0d"/>
+            <path d="M10 85V48Q10 43 15 42H112Q115 42 116 44L124 60H160Q166 60 167 65V82Q167 85 163 85Z" fill="url(#paintGreenB)"/>
+            <path d="M11.5 43H112Q114.4 43 115.3 44.8L123.4 60.6H161" stroke="#9cbc9a" stroke-width="1" fill="none" opacity=".45"/>
+            <path d="M16 46H44V58H16ZM48 46H76V58H48ZM80 46H111L117.5 58H80Z" fill="url(#glass)"/>
+            <path d="M82 47H90L85 57H80Z" fill="#fff" opacity=".07"/>
+            <path d="M12 62H166" stroke="#a8bca8" stroke-width=".8" opacity=".45"/>
+            <path d="M46 46V82M78 46V82" stroke="#18261b" stroke-width=".9"/>
+            <path d="M24 85V76Q24 69 31 69H49Q56 69 56 76V85ZM120 85V76Q120 69 127 69H145Q152 69 152 76V85Z" fill="#111813"/>
+            <rect x="7" y="80" width="12" height="5" fill="#1b1e1c"/><rect x="152" y="80" width="18" height="6" rx="1" fill="#2b302d"/>
+            <circle cx="161.5" cy="67" r="5" fill="#fff4c2" opacity=".14"/><circle cx="161.5" cy="67" r="3.1" fill="#fff4c2" opacity=".85"/>
+            <use href="#wSteel" x="26.5" y="71.5" width="27" height="27"/>
+            <use href="#wSteel" x="122.5" y="71.5" width="27" height="27"/>
           </svg>
         </div>
       </div>
 
-      <!-- Right Basecamp: Campfire with Flickering Flames, BBQ Grill with Smoke, & Tesla Model Y -->
+      <!-- Right Basecamp: Campfire, BBQ Grill with Smoke, & Electric Crossover -->
       <div class="camp-cluster">
         <!-- Animated Campfire -->
         <div class="campfire-wrap">
@@ -892,21 +1005,23 @@
           </svg>
         </div>
 
-        <!-- Tesla Model Y in Camp Mode with Subtle Tech Lightbar -->
-        <div style="position: relative; width: 95px; height: 55px;">
-          <svg viewBox="0 0 110 55" width="95" height="55">
-            <!-- Slim Roof Rack -->
-            <rect x="28" y="12" width="45" height="2.5" fill="#4d6257" />
-            <!-- Model Y Aerodynamic Body -->
-            <path d="M8 44 C8 32 20 18 45 16 C68 14 85 20 95 28 L104 33 C106 36 106 42 104 44 H92 A8 8 0 0 0 76 44 H38 A8 8 0 0 0 22 44 Z" fill="#1b2822"/>
-            <!-- Cyber Lightbar Glow -->
-            <path d="M96 33 L104 35" stroke="#22c55e" stroke-width="2" stroke-linecap="round"/>
-            <line x1="4" y1="36" x2="8" y2="36" stroke="#ff4422" stroke-width="2" stroke-linecap="round"/>
-            <!-- Wheels -->
-            <circle cx="30" cy="44" r="7.5" fill="#080e0b" stroke="#2c3e34" stroke-width="2"/>
-            <circle cx="84" cy="44" r="7.5" fill="#080e0b" stroke="#2c3e34" stroke-width="2"/>
-            <!-- Ground Power Cable connecting to Camp -->
-            <path d="M6 44 Q -10 46 -22 44" stroke="#22c55e" stroke-width="1.2" stroke-dasharray="3 3" fill="none" opacity="0.6"/>
+        <!-- Black electric crossover in camp mode -->
+        <div style="position: relative; width: 118px; height: 52px;">
+          <svg viewBox="0 0 160 70" width="118" height="52" aria-hidden="true" overflow="visible">
+            <ellipse cx="80" cy="65" rx="72" ry="3.2" fill="#000" opacity=".55"/>
+            <path d="M8 52C7 44 10 40 18 38L36 33C50 20 70 15 90 15C108 15 122 22 134 31L146 35C152 37 154 42 153 48L152 52Z" fill="url(#paintBlack)"/>
+            <path d="M42 33C54 22 70 19 88 19C103 19 115 24 126 32Z" fill="url(#glass)"/>
+            <path d="M60 23C70 20 80 19.5 88 19.6L80 31H54Z" fill="#9fb4c2" opacity=".08"/>
+            <path d="M36 33C50 20 70 15 90 15C108 15 122 22 134 31" stroke="#9aa6af" stroke-width="1" fill="none" opacity=".55"/>
+            <path d="M85 20V33M85 34V49" stroke="#000" stroke-width=".8"/>
+            <path d="M18 38.5H146" stroke="#2f353b" stroke-width=".8"/>
+            <g fill="#3c444b"><rect x="62" y="37" width="7" height="1.4" rx=".7"/><rect x="100" y="37" width="7" height="1.4" rx=".7"/></g>
+            <path d="M22 52A16 16 0 0 1 54 52ZM106 52A16 16 0 0 1 138 52Z" fill="#050607"/>
+            <path d="M138 34L150 37.4" stroke="#eaf6ff" stroke-width="1.7" stroke-linecap="round"/>
+            <path d="M9.5 39.5L22 37" stroke="#ff3b2f" stroke-width="1.8" stroke-linecap="round"/>
+            <use href="#wAero" x="25" y="39" width="26" height="26"/>
+            <use href="#wAero" x="109" y="39" width="26" height="26"/>
+            <path d="M7 52Q-8 54-22 52" stroke="#22c55e" stroke-width="1.2" stroke-dasharray="3 3" fill="none" opacity="0.6"/>
           </svg>
         </div>
 
